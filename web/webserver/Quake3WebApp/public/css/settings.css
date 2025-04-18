@@ -1,0 +1,214 @@
+* {
+    xborder: 1px solid red;
+}
+
+input {
+    xborder: 1px solid red !important;
+}
+
+input[type=range] {
+    width: 2em;
+}
+
+.scroll-container {
+    display: block;
+    margin: 0 auto;
+    text-align: left;
+    width: 100%;
+    height: 70vh;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+}
+
+.scroll-page {
+    display: grid;
+    grid-template-columns: 45% 45%;
+    grid-template-rows: auto;
+    align-items: center;
+    justify-content: center;
+    xxheight: 100%;
+}
+
+.scroll-page h2 {
+    width: 100%;
+}
+
+.row {
+    padding: 0.5em;
+    margin: 0 0.5em 1em 0.5em;
+    margin: 1 1.5em 1em 1.5em;
+    line-height: 0.5em;
+    xxborder: 1px solid red;
+}
+
+.col {
+}
+
+::backdrop  {
+    background-image: linear-gradient( 0deg, rgba(1,1,1,.5), rgba(1,1,1,.8), white, rgba(1,1,1,.8), rgba(1,1,1,.5));
+}
+
+#bindDialog {
+    backdrop-filter: blur(1px);
+    background-color: rgba(0, 0, 0, .5);
+    background:none;
+    border: none;
+    height: 35vh;
+    margin: auto;
+    position: fixed;
+    text-align: center;
+    width: 100%;
+}
+
+#bindDialog {
+    visibility:visible;
+}
+
+#bindDialogContent * {
+    font-size: 14pt;
+    margin: .4em;
+    padding: 0.5em;
+    color: black;
+}
+
+#bindDialog button {
+    border-radius: 12px;
+    border-style: none;
+}
+
+div#bindDialogContent div p span#bindkeys {
+    font-size: 32pt;
+}
+
+input:focus-visible {
+    border:none;
+}
+
+input[type=text] {
+	appearance: none;
+	background-clip: padding-box;
+    background-color: rgba(33, 37, 41, 0.75);
+    border-color: rgba( 50, 50, 50, .5 );
+	border-radius: 5px;
+    border-style: unset;
+    border-width: 10px;
+    color:white;
+	font-weight: 400;
+    line-height:normal;
+	padding: .375rem .75rem;
+	transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+	width: 100%;
+}
+
+input[type=range], input[type=number] {
+	height: 2em;
+	border: none;
+	background-color: rgba(50,50,50,1%);
+	color: white;
+	margin-left: 2em;
+	font-size: large;
+}
+
+input[type=number] {
+	font-size: large;
+}
+
+/* 
+ * from codepen https://codepen.io/irajsuhail
+ * by Raj Suhail @irajsuhail
+ */
+
+.keyboard-base {
+    max-width: 1085px;
+    padding: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgb(197, 197, 197);
+    border-radius: 10px;
+    display: grid;
+    grid-template-columns: repeat(30, 30px);
+    grid-template-rows: repeat(5, 60px);
+    grid-gap: 5px;
+    font-family:Arial;
+}
+
+.key {
+    background-color: rgb(243, 243, 243);
+    border: 2px solid black;
+    border-radius: 5px;
+    grid-column: span 2;
+    font-size: 20px;
+    text-align: center;
+    padding-top: 17px;
+}
+
+.key:hover {
+  border: 1px solid #eeeeee;
+}
+
+.delete {
+    grid-column: span 4;
+}
+
+.tab {
+    grid-column: span 3;
+}
+
+.backslash {
+    grid-column: span 3;
+}
+
+.capslock {
+    grid-column: span 4;
+}
+
+.return {
+    grid-column: span 4;
+}
+
+.leftshift {
+    grid-column: span 5;
+}
+
+.rightshift {
+    grid-column: span 5;
+}
+
+.leftctrl {
+    grid-column: span 3;
+}
+
+.command {
+    grid-column: span 3;
+    font-size: 14px;
+}
+
+.space {
+    grid-column: span 13;
+}
+
+.bindDialogContent {
+    visibility: visible;
+    display:block;
+}
+
+.keyboard {
+    position:relative;
+    visibility: hidden;
+    display: none;
+}
+
+#bindDialogKeyboard, #bindDialogMouse {
+    font-size: XX-LARGE;
+}
+
+.tux {
+    padding:0;
+    border: 0;
+    margin:0;
+    height:32px;
+    width: 32px;
+}

@@ -1,0 +1,78 @@
+# This is the main configuration file of your Dancer2 app
+# env-related settings should go to environments/$env.yml
+# all the settings in this file will be loaded at Dancer's startup.
+
+# === Basic configuration ===
+
+# dsn="dbi:Pg:dbname=quake3webapp;host=localhost" 
+#
+# Your application's name
+appname: "Quake3WebApp"
+
+# The default layout to use for your application (located in
+# views/layouts/main.tt)
+layout: "main"
+
+#domain: "quake3.now"
+domain: "www.localhosty.com"
+
+# when the charset is set to UTF-8 Dancer2 will handle for you
+# all the magic of encoding and decoding. You should not care
+# about unicode within your app when this setting is set (recommended).
+charset: "UTF-8"
+
+template: "template_toolkit"
+
+session: 'DBI'
+
+logger: "File"
+
+plugins:
+    Database:
+        driver: 'Pg'
+        database: 'quake3webapp'
+        host: 'localhost'
+        port: 5432
+        username: 'quake3webapp'
+        password: 'PASSWORD'
+        dbi_params:
+            RaiseError: 1
+            AutoCommit: 1
+        on_connect_do: ["SET search_path TO webapp;" ]
+        log_queries: 1
+
+    Ajax:
+      content_type: 'application/json'
+
+# === Engines ===
+#
+# NOTE: All the engine configurations need to be under a single "engines:"
+# key.  If you uncomment engine configurations below, make sure to delete
+# all "engines:" lines except the first.  Otherwise, only the last
+# "engines:" block will take effect.
+
+engines:
+   logger:
+     File:
+       log_dir: "/home/<you>/Projects/IOQuake3/ioq3wasm/web/webserver/Quake3WebApp/logs/"
+       file_name: "Quake3WebApp.log"
+   template:
+     template_toolkit:
+      # Note: start_tag and end_tag are regexes
+       start_tag: '[%'
+       end_tag:   '%]'
+   session:
+      DBI:
+        dsn: "dbi:Pg:dbname=quake3webapp;host=localhost" 
+        dbtable: "sessions"
+        dbuser: "quake3webapp"
+        dbpass: "PASSWORD"
+        #https://metacpan.org/pod/Dancer2::Core::Role::SessionFactory
+        cookie_path: "/"
+        cookie_domain: "www.localhosty.com"
+        cookie_same_site: "None"
+        cookie_duration: "+48h"
+        session_duration: "604800"
+        is_secure: "1"
+        is_httponly: "1"
+

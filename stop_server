@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# path to database files
+DBPATH=~/Projects/IOQuake3/ioq3wasm/web/webserver/database
+PSQL="psql -U $USER -d quake3webapp -h localhost"
+
+# check if its already running
+if ! /usr/bin/pg_ctl status -D $DBPATH; then
+    echo "database not running"
+    exit
+fi
+
+running_servers=($($PSQL -t -c "select instance_id from running_servers where state = 'running';"));
+
+for instance_id in ${running_servers[@]}; do
+    echo "running instance: $instance_id"
+    $PSQL -c "SELECT * FROM create_request('quit', '$instance_id', '');"
+done 
+
+sleep 2;
+
+# stop database, wait for clients to exit
+/usr/bin/pg_ctl stop -m smart -D $DBPATH
+

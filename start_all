@@ -1,0 +1,25 @@
+#!/bin/bash
+
+echo "starting all"
+
+echo "starting server"
+./start_server
+sleep 1
+
+# echo "starting proxy"
+# ./start_proxy
+# sleep 1
+
+echo "starting lighttpd"
+./start_lighttpd 
+sleep 1
+
+# ./spawn_game q3ctf3
+
+./status_server
+
+# echo "./spawn_game"
+# echo "./start_psql"
+
+echo "you can close this terminal"
+

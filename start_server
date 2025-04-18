@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# path to database files
+DBPATH=~/Projects/IOQuake3/ioq3wasm/web/webserver/database
+PSQL="psql -U $USER -d quake3webapp -h localhost"
+PGCTL="/usr/bin/pg_ctl"
+
+# check if its already running
+if ! $PGCTL status -D $DBPATH; then
+    # start database
+    $PGCTL start -D $DBPATH -l logfile
+fi
+
+# # start proxy
+# cd ~/Projects/IOQuake3/ioq3wasm/web/proxy
+# ./proxy.pl &
+

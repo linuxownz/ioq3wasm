@@ -1,0 +1,1 @@
+/home/campbell/Projects/IOQuake3/ioq3wasm/settings/ycm_extra_conf.py

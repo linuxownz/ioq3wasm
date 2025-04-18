@@ -1,0 +1,9 @@
+#!/bin/bash
+
+SQL="psql -U $USER -d quake3webapp -h localhost"
+$SQL -t -c 'SELECT * FROM webapp."RESET_FOR_TEST"()'
+
+# start proxy
+cd ~/Projects/IOQuake3/ioq3wasm/web/proxy
+./proxy.pl &
+

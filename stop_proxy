@@ -1,0 +1,18 @@
+#!/bin/bash
+
+declare -a pids=($(pgrep perl))
+
+for pid in ${pids[@]}; do 
+    #echo "perl process: $pid"
+    processes=$(ps -p $pid -o pid,cmd -h)
+
+    if ! [ -z "$processes" ]; then
+        #echo $processes;
+        pid=$(echo $processes|grep proxy.pl|cut -d' ' -f1)
+        
+        if ! [ -z "$pid" ]; then
+            echo "killing proxy process pid '$pid'"
+            kill $pid
+        fi
+    fi
+done

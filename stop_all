@@ -1,0 +1,22 @@
+#!/bin/bash
+
+echo "stoping all"
+
+./status_server
+
+echo "stopping proxy"
+./stop_proxy
+sleep 1
+
+echo "stopping lighttpd"
+./stop_lighttpd
+sleep 1
+
+echo "stopping server"
+./stop_server
+sleep 1
+
+./status_server
+
+echo "you can close this terminal"
+

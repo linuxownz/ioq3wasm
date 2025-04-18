@@ -1,0 +1,24 @@
+//https://redmine.lighttpd.net/boards/2/topics/1833
+//https://redmine.lighttpd.net/projects/lighttpd/wiki
+
+server.modules += ("mod_fastcgi")
+
+fastcgi.server = (
+    ".cgi" => ( # suffix-match if it starts with "." 
+        # List of servers load-balanced by Lighttpd 
+        (   "host" => "localhost", # FastCGI over TCP/IP
+            "port" => 1234 ), 
+        # FastCGI over UNIX domain sockets 
+        (   "socket" => "/var/sock/lighttpd-fcgi.sock" ), 
+        # FastCGI application started by Lighttpd 
+        (   "bin-path" => "/usr/bin/perl",
+            "docroot" => "/var/www/myperlapp" ) 
+    ), 
+    "/cgi-bin" => ( # prefix-match if it starts with "/" 
+        ( 
+            "bin-path" => "/usr/bin/php-fcgi", "broken-scriptfilename" => "enable", 
+            "min-procs" => 1, 
+            "max-procs" => 4 # ... other options folllow
+        )
+    )
+)

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+#openssl req -x509 -newkey rsa:4096 -keyout private.key.pem -out domain.cert.pem -sha256
+openssl req  -nodes -new -x509  -keyout private.key.pem -out domain.cert.pem
+
+#openssl rsa -in private.key.pem -out new.private.key.pem
+

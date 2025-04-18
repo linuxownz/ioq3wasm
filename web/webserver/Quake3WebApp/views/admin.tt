@@ -1,0 +1,136 @@
+    <form id="form" name="[% template_name %]" action="/" method="post">
+        <input type="hidden" name="flag" value="1"/>
+    </form>
+
+    <dialog id="UserDialog">
+        <div id="UserDialogTitle">User</div>
+        <div>
+            <form id="UserDialogForm" name="[% template_name %]" action="/" method="post">
+                <input type="hidden" name="flag" value="1"/>
+                <input type="hidden" name="rm"   value="admin" />
+                <input type="hidden" name="id"   value="" />
+                <input type="hidden" name="action" value="" />
+                <table>
+                    <tr><td>Username</td><td><input type="text" name="username" value="" autocomplete="off"/></td></tr>
+                    <tr><td>Fullname</td><td><input type="text" name="fullname" value=""/></td></tr>
+                    <tr><td>Enabled </td><td><input type="text" name="enabled"  value=""/></td></tr>
+                    <tr><td>Admin   </td><td><input type="text" name="admin"    value=""/></td></tr>
+                    <tr><td>Plaintext</td><td><input type="text" name="plaintext"value=""/></td></tr>
+                    <tr><td colspan="2"><input type="submit" name="submit" value="Submit"/></td></tr>
+                </table>
+            </form>
+        </div>
+    </dialog>
+
+    <div class="container">
+        <header>[% constants.application_name %]</header>
+        [% INCLUDE nav.tt %]
+        <section class="main_section">
+            <div class="admin_main">
+
+                <div id="nav" class="container-fluid">
+                    <h1>Admin</h1>
+                    <ul class="nav nav-pills">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#user_page">Users</a>
+                        </li>
+                        <!--li class="nav-item">
+                            <a class="nav-link" href="#action_page"></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#basic_page">Basic</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Spectating</a>
+                        </li-->
+                    </ul>
+                </div>
+
+                <div class="scroll-container">
+
+                    <div class="scroll-page" id="user_page">
+
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h2>Users</h2>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">
+                                <table id="usertable">
+                                    <thead>
+                                        <tr>
+                                            <td>Username</td>
+                                            <td>Fullname</td>
+                                            <td>Enabled</td>
+                                            <td>Admin</td>
+                                            <td>Plaintext</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    [% FOREACH user IN users %]
+                                        <tr
+                                            data-id="[%user.id%]" data-username="[%user.username%]" data-fullname="[%user.fullname%]"
+                                            data-enabled="[%user.enabled%]" data-admin="[%user.admin%]" data-plaintext="[%user.plaintext%]"
+                                            onclick="editUser(this)";>
+
+                                            <td>[%user.username%]</td>
+                                            <td>[%user.fullname%]</td>
+                                            <td>[%user.enabled%] </td>
+                                            <td>[%user.admin%]   </td>
+                                            <td>[%user.plaintext%]</td>
+                                        </tr>
+                                    [% END %]
+                                        <tr>
+                                            <td colspan="4">
+                                                <span><button id="addnew" name="AddNew" onclick="editUser(null);">Add</button></span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <script>
+            function editUser ( obj ) {
+                const title  = document.getElementById('UserDialogTitle');
+                if ( title ) {
+                    title.textContent = obj === null ? "Add User" : "Edit User";
+                }
+
+                var form = document.getElementById('UserDialogForm');
+                form.elements.namedItem('id').value = '';
+                form.elements.namedItem('action').value = 'addUser';
+
+                var names = [ 'username', 'fullname', 'id', 'enabled', 'admin', 'plaintext' ];
+                names.forEach ( ( fieldname ) => {
+                    var item = form.elements.namedItem(fieldname);
+                    if ( item ) {
+                        item.value = '';
+                    }
+                });
+
+                if ( obj ) {
+                    form.elements.namedItem('action').value = 'editUser';
+                    names.forEach ( ( fieldname ) => {
+                        var item = form.elements.namedItem(fieldname);
+                        if ( item ) {
+                            item.value = obj.dataset[fieldname];
+                        }
+                    });
+                }
+
+                const dialog = document.getElementById('UserDialog');
+                dialog.showModal();
+            }
+        </script>
+    </div>
+

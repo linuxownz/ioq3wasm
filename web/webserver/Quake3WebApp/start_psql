@@ -1,0 +1,1 @@
+psql -U $USER -d quake3webapp -h localhost

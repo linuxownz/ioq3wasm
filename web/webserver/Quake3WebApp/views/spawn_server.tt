@@ -1,0 +1,108 @@
+
+        <form id="form" name="[% template_name %]" action="/" method="post">
+            <input type="hidden" name="flag" value="1"/>
+        </form>
+
+
+        <style>
+
+            body { overflow: visible !important }
+            * { xborder: 1px solid red  !important; padding: .3em }
+            form input { line-height: 2em }
+            div label input { left: 4em }
+            .mapimg {
+                max-width:128px;
+                max-height:128px;
+            }
+            .maps { height:500px; width: 90%; overflow:auto }
+            section.main_section div label { width: 9em }
+
+            input[type=checkbox] { display: none; }
+
+            .maps label:before {
+                content: url("/images/unchecked_checkbox.png");
+                position: relative;
+                top: 40px;
+                z-index: 200;
+            }
+
+            .maps :checked+label:before {
+                content: url("/images/checked_checkbox.png");
+            }
+
+            .mapbrowser { font-size: 48px}
+
+        </style>
+
+        [% USE Dumper           %]
+        [% # Dumper.dump ( maps ) %]
+
+        <div class="container">
+            <header>[% appname %]</header>
+            [% INCLUDE nav.tt %]
+
+
+            <form id="form2" name="[% template_name %]" action="/" method="post">
+                <input type="hidden" name="spawn" value="1"/>
+
+                <section class="main_section">
+                    <div class="mapbrowser">Spawn Server</div>
+
+                    <div>[% msg %]</div>
+                    <input type="hidden" name="flag" value="1"/>
+                    <input type="hidden" name="rm" value="spawn_server"/>
+
+                    <div>
+                        <label for="servername">Server Name:</label>
+                        <input type="text" name="servername" value="Server 1"></input>
+                    </div>
+
+                    <div>
+                        <label for="g_gametype">Game Type:</label>
+                        <select name="g_gametype">
+                            <option value="0">FFA</option>
+                            <option value="1">Tournament</option>
+                            <option value="3">TDM</option>
+                            <option value="4">CTF</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="bot_minplayers">Min Bot players:
+                        <input name="bot_minplayers" type="number" min="0" max="8" value="0"></input>
+                        </label>
+
+                        <label for="timelimit">Time limit:
+                        <input name="timelimit" type="number" min="1" max="20" value="20"></input>
+                        </label>
+
+                        <label for="capturelimit">Capture limit:
+                        <input name="capturelimit" type="number" min="1" max="20" value="8" ></input>
+                        </label>
+
+                        <label for="fraglimit">Frag limit:
+                        <input name="fraglimit" type="number" min="1" max="20" value="20" ></input>
+                        </label>
+                    </div>
+
+
+                    <div class="maps">
+
+                        [% FOREACH map IN maps %]
+                        <span class="" title="[% map.mapname %]">
+                            <input name="map" type="checkbox" id="[% map.map_id %]" value="[% map.map_id %]">
+                            <label for="[% map.map_id %]">
+                                <img class="mapimg" data-mapname="[% map.mapname %]" src="/approot/[%map.mapscreenshothash%]"/>
+                            </label>
+                        </span>
+                        [% END %]
+
+                    </div>
+
+                    <button onclick="return confirm('Launch Server?')">Launch</button>
+
+                </section>
+                <footer/>
+            </form>
+        </div>
+

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+while read file ; do 
+    echo "$file" ; 
+    rm "$file" ; 
+done < <( find ~/q3a/baseq3/ -name '*.cfg' -o -name '*.pid'| grep -E '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}.*$')

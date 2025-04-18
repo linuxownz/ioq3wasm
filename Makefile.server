@@ -1,0 +1,283 @@
+#
+# ioq3 SERVER ONLY Makefile
+# non wasm but including websockets
+#
+# meson?
+
+SHELL=/bin/bash
+
+STRIP=0
+
+COVERAGE=0
+
+ifndef VERSION
+VERSION=1.36
+endif
+
+ifndef CODE_DIR
+CODE_DIR=code
+endif
+
+ifndef BUILD_DIR
+BUILD_DIR=build/server/
+endif
+
+#############################################################################
+
+PKG_CONFIG = pkg-config
+
+# Add git version info
+ifeq ($(wildcard .git),.git)
+  GIT_REV=$(shell git show -s --pretty=format:%h-%ad --date=short)
+  GIT_BRANCH=$(shell git branch --show-current)
+  ifneq ($(GIT_REV),)
+    VERSION:=$(VERSION)_GIT_$(GIT_BRANCH)_$(GIT_REV)
+  endif
+endif
+
+#############################################################################
+# SETUP AND BUILD -- LINUX
+#############################################################################
+COMPILE_FLAGS  = -Wall -Werror -Wextra -fno-strict-aliasing -Wimplicit -Wstrict-prototypes -Wunused -Wunused-function
+#COMPILE_FLAGS += -DARCH_STRING=\"Linux\"
+COMPILE_FLAGS += -DBOTLIB
+COMPILE_FLAGS += -DSERVER=1
+COMPILE_FLAGS += -O3 -ffast-math
+COMPILE_FLAGS += -IwsServer/include
+
+DEBUG_FLAGS  = -Wall -Werror -ggdb
+#DEBUG_FLAGS += -DARCH_STRING=\"Linux\"
+DEBUG_FLAGS += -DBOTLIB
+DEBUG_FLAGS += -DDEBUG 
+DEBUG_FLAGS += -DSERVER=1
+
+#zlib-static.x86_64
+COMPILE_FLAGS += $(shell $(PKG_CONFIG) --silence-errors --cflags zlib || true)
+DEBUG_FLAGS   += $(shell $(PKG_CONFIG) --silence-errors --cflags zlib || true)
+
+# for gcov
+# You have to pass -fprofile-arcs -ftest-coverage when compiling.
+# You have to pass -fprofile-arcs when linking.
+# https://stackoverflow.com/questions/566472/where-are-the-gcov-symbols
+
+ifneq ($(COVERAGE),0)
+  DEBUG_FLAGS += --coverage -fprofile-arcs -ftest-coverage
+endif
+
+# CC=emcc run under node?
+CC=gcc
+
+ifeq ($(STRIP),1)
+  COMPILE_FLAGS += -s
+endif
+
+# # https://reproducible-builds.org/specs/source-date-epoch/
+# ifdef SOURCE_DATE_EPOCH
+#   COMPILE_FLAGS += -DPRODUCT_DATE=\\\"$(shell date --date="@$$SOURCE_DATE_EPOCH" "+%b %_d %Y" | sed -e 's/ /\\\ /'g)\\\"
+# endif
+
+# COMPILE_FLAGS += -DPRODUCT_VERSION=\"$(VERSION)\"
+COMPILE_FLAGS += -Wformat=2 -Wno-format-zero-length -Wformat-security -Wno-format-nonliteral
+COMPILE_FLAGS += -Wstrict-aliasing=2 -Wmissing-format-attribute
+COMPILE_FLAGS += -Wdisabled-optimization
+COMPILE_FLAGS += -Werror-implicit-function-declaration
+
+# LINKER FLAGS
+LINKER_FLAGS += $(shell $(PKG_CONFIG) --silence-errors --libs zlib   || echo -lz)
+LINKER_FLAGS += -lm -lssl -lcrypto
+
+# git submodule wsServer
+LINKER_FLAGS += -L ./code/wsServer
+LINKER_FLAGS += -lws
+
+DEBUGLINKER_FLAGS = $(LINKER_FLAGS)
+ifneq ($(COVERAGE),0)
+  DEBUGLINKER_FLAGS += -fprofile-arcs
+endif
+
+#############################################################################
+# DEDICATED SERVER
+#############################################################################
+
+Q3DEDSERVERFILES = \
+	$(CODE_DIR)/server/sv_bot.c \
+	$(CODE_DIR)/server/sv_ccmds.c \
+	$(CODE_DIR)/server/sv_client.c \
+	$(CODE_DIR)/server/sv_game.c \
+	$(CODE_DIR)/server/sv_init.c \
+	$(CODE_DIR)/server/sv_main.c \
+	$(CODE_DIR)/server/sv_net_chan.c \
+	$(CODE_DIR)/server/sv_snapshot.c \
+	$(CODE_DIR)/server/sv_world.c
+
+Q3DEDQCOMMONFILES = \
+	$(CODE_DIR)/qcommon/cmd_server.c \
+	$(CODE_DIR)/qcommon/cm_load_server.c \
+	$(CODE_DIR)/qcommon/cm_patch.c \
+	$(CODE_DIR)/qcommon/cm_polylib.c \
+	$(CODE_DIR)/qcommon/cm_test.c \
+	$(CODE_DIR)/qcommon/cm_trace.c \
+	$(CODE_DIR)/qcommon/common_server.c \
+	$(CODE_DIR)/qcommon/cvar.c \
+	$(CODE_DIR)/qcommon/files_server.c \
+	$(CODE_DIR)/qcommon/ftola.c \
+	$(CODE_DIR)/qcommon/huffman.c \
+	$(CODE_DIR)/qcommon/ioapi.c \
+	$(CODE_DIR)/qcommon/md4.c \
+	$(CODE_DIR)/qcommon/msg.c \
+	$(CODE_DIR)/qcommon/net_chan.c \
+	$(CODE_DIR)/qcommon/net_ip_server.c \
+	$(CODE_DIR)/qcommon/net_ws_server.c \
+	$(CODE_DIR)/qcommon/q_math.c \
+	$(CODE_DIR)/qcommon/q_shared.c \
+	$(CODE_DIR)/qcommon/snapvector.c \
+	$(CODE_DIR)/qcommon/unzip.c
+
+Q3DEDBOTLIBFILES = \
+	$(CODE_DIR)/botlib/be_aas_bspq3.c \
+	$(CODE_DIR)/botlib/be_aas_cluster.c \
+	$(CODE_DIR)/botlib/be_aas_debug.c \
+	$(CODE_DIR)/botlib/be_aas_entity.c \
+	$(CODE_DIR)/botlib/be_aas_file.c \
+	$(CODE_DIR)/botlib/be_aas_main.c \
+	$(CODE_DIR)/botlib/be_aas_move.c \
+	$(CODE_DIR)/botlib/be_aas_optimize.c \
+	$(CODE_DIR)/botlib/be_aas_reach.c \
+	$(CODE_DIR)/botlib/be_aas_routealt.c \
+	$(CODE_DIR)/botlib/be_aas_route.c \
+	$(CODE_DIR)/botlib/be_aas_sample.c \
+	$(CODE_DIR)/botlib/be_ai_char.c \
+	$(CODE_DIR)/botlib/be_ai_chat.c \
+	$(CODE_DIR)/botlib/be_ai_gen.c \
+	$(CODE_DIR)/botlib/be_ai_goal.c \
+	$(CODE_DIR)/botlib/be_ai_move.c \
+	$(CODE_DIR)/botlib/be_ai_weap.c \
+	$(CODE_DIR)/botlib/be_ai_weight.c \
+	$(CODE_DIR)/botlib/be_ea.c \
+	$(CODE_DIR)/botlib/be_interface.c \
+	$(CODE_DIR)/botlib/l_crc.c \
+	$(CODE_DIR)/botlib/l_libvar.c \
+	$(CODE_DIR)/botlib/l_log.c \
+	$(CODE_DIR)/botlib/l_memory.c \
+	$(CODE_DIR)/botlib/l_precomp.c \
+	$(CODE_DIR)/botlib/l_script.c \
+	$(CODE_DIR)/botlib/l_struct.c
+
+#$(CODE_DIR)/sys/con_log.c
+#$(CODE_DIR)/sys/con_tty.c
+
+Q3DEDSYSFILES= \
+	$(CODE_DIR)/sys/sys_main_server.c \
+	$(CODE_DIR)/sys/sys_unix_server.c
+
+Q3DEDBASEGAMEFILES = \
+	$(CODE_DIR)/game/ai_chat.c \
+	$(CODE_DIR)/game/ai_cmd.c \
+	$(CODE_DIR)/game/ai_dmnet.c \
+	$(CODE_DIR)/game/ai_dmq3.c \
+	$(CODE_DIR)/game/ai_main.c \
+	$(CODE_DIR)/game/ai_team.c \
+	$(CODE_DIR)/game/ai_vcmd.c \
+	$(CODE_DIR)/game/bg_misc.c \
+	$(CODE_DIR)/game/bg_pmove.c \
+	$(CODE_DIR)/game/bg_slidemove.c \
+	$(CODE_DIR)/game/g_active.c \
+	$(CODE_DIR)/game/g_arenas.c \
+	$(CODE_DIR)/game/g_bot.c \
+	$(CODE_DIR)/game/g_client.c \
+	$(CODE_DIR)/game/g_cmds.c \
+	$(CODE_DIR)/game/g_combat.c \
+	$(CODE_DIR)/game/g_items.c \
+	$(CODE_DIR)/game/g_main.c \
+	$(CODE_DIR)/game/g_mem.c \
+	$(CODE_DIR)/game/g_misc.c \
+	$(CODE_DIR)/game/g_missile.c \
+	$(CODE_DIR)/game/g_mover.c \
+	$(CODE_DIR)/game/g_session.c \
+	$(CODE_DIR)/game/g_spawn.c \
+	$(CODE_DIR)/game/g_svcmds.c \
+	$(CODE_DIR)/game/g_target.c \
+	$(CODE_DIR)/game/g_team.c \
+	$(CODE_DIR)/game/g_trigger.c \
+	$(CODE_DIR)/game/g_unlagged.c \
+	$(CODE_DIR)/game/g_utils.c \
+	$(CODE_DIR)/game/g_weapon.c
+
+Q3DEDSYSOBJS      := $(Q3DEDSYSFILES:%=$(BUILD_DIR)/%.o)
+Q3DEDBOTLIBOBJS   := $(Q3DEDBOTLIBFILES:%=$(BUILD_DIR)/%.o)
+Q3DEDSERVEROBJS   := $(Q3DEDSERVERFILES:%=$(BUILD_DIR)/%.o)
+Q3DEDQCOMMONOBJS  := $(Q3DEDQCOMMONFILES:%=$(BUILD_DIR)/%.o)
+Q3DEDBASEGAMEOBJS := $(Q3DEDBASEGAMEFILES:%=$(BUILD_DIR)/%.o)
+
+ALLOBJS := $(Q3DEDSYSOBJS) $(Q3DEDBOTLIBOBJS) $(Q3DEDSERVEROBJS) $(Q3DEDQCOMMONOBJS) $(Q3DEDBASEGAMEOBJS)
+
+DEBQ3DEDSYSOBJS      := $(Q3DEDSYSFILES:%=$(BUILD_DIR)/%.d.o)
+DEBQ3DEDBOTLIBOBJS   := $(Q3DEDBOTLIBFILES:%=$(BUILD_DIR)/%.d.o)
+DEBQ3DEDSERVEROBJS   := $(Q3DEDSERVERFILES:%=$(BUILD_DIR)/%.d.o)
+DEBQ3DEDQCOMMONOBJS  := $(Q3DEDQCOMMONFILES:%=$(BUILD_DIR)/%.d.o)
+DEBQ3DEDBASEGAMEOBJS := $(Q3DEDBASEGAMEFILES:%=$(BUILD_DIR)/%.d.o)
+
+DEBOBJS := $(DEBQ3DEDSYSOBJS) $(DEBQ3DEDBOTLIBOBJS) $(DEBQ3DEDSERVEROBJS) $(DEBQ3DEDQCOMMONOBJS) $(DEBQ3DEDBASEGAMEOBJS)
+
+ALLSRCFILES := $(Q3DEDSYSFILES) $(Q3DEDBOTLIBFILES) $(Q3DEDSERVERFILES) $(Q3DEDQCOMMONFILES) $(Q3DEDBASEGAMEFILES)
+
+# ws for websockets
+RELTARGET = ioq3dedws.x86_64
+DEBTARGET = ioq3dedws_debug.x86_64
+
+# strip MY NAME from builds
+# strip MY NAME from builds
+#
+#  >>>>> CURRENTLY converting to be all statically compiled, no vm <<<<<
+#  CHECK THAT THE SERVER STILL WORKS BEFORE CONVERTING/ADDING WEBSOCKET SUPPORT
+#
+
+.PHONY: all clean release debug
+
+all: pre-build build
+
+pre-build:
+	@echo pre-build
+
+build: $(BUILD_DIR)/$(RELTARGET)
+
+release: $(BUILD_DIR)/$(RELTARGET)
+
+debug: $(BUILD_DIR)/$(DEBTARGET)
+
+# release build
+$(BUILD_DIR)/$(RELTARGET): $(ALLOBJS)
+	$(CC) $(ALLOBJS) -o $@ $(LINKER_FLAGS)
+	@echo
+	@echo built release $@
+
+$(BUILD_DIR)/$(DEBTARGET): $(DEBOBJS)
+	$(CC) $(DEBOBJS) -o $@ $(DEBUGLINKER_FLAGS)
+	@echo
+	@echo built debug $@
+
+$(BUILD_DIR)/%.c.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) -c $(COMPILE_FLAGS) $< -o $@
+	@echo
+
+$(BUILD_DIR)/%.c.d.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) -c $(DEBUG_FLAGS) $< -o $@
+	@echo
+
+clean:
+	@rm -rf ./$(BUILD_DIR)
+	@echo
+
+docs:
+	doxygen ioquake3_doc.doxygen
+
+listsourcefiles:
+	@echo $(ALLSRCFILES)
+
+# program has to be run after building
+coverage:
+	@lcov --capture --directory $(BUILD_DIR) --output-file coverage.info
+	@genhtml coverage.info --output-directory server_docs/coverage
+

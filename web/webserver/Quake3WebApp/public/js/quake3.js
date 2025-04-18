@@ -1,0 +1,1 @@
+../../../../../build/client/quake3.js

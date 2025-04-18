@@ -1,0 +1,72 @@
+@import url("info.css");
+
+* {
+    xborder: 1px solid red;
+}
+
+.servers {
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-rows: auto;
+    row-gap: 1em;
+    padding: 1vh;
+}
+
+.server {
+    grid-column:1;
+    display:flex;
+}
+
+.servername {
+    font-size: 46pt;
+    margin-left : .5em;
+}
+
+.serverbrowser {
+    font-size: 32pt;
+    margin-bottom: .75em;
+}
+
+.browser-filters button {
+    margin-left: 2em;
+}
+
+.browser-filters {
+    margin-left: 1em;
+}
+
+.filter-button {
+    margin:.5em;
+    border:none;
+    padding: .3em;
+    background:none;
+    backdrop-filter: blur(2px);
+    color: red;
+}
+
+.server img {
+    padding: .4em;
+    float:left;
+}
+
+#server span {
+    vertical-align: top;
+    border: 1px solid red;
+}
+
+#serverinfo {
+    font-size: initial;
+}
+
+#playerinfo {
+    font-size: initial;
+}
+
+.serverinfoitem {
+    margin-left : .5em;
+}
+
+.playerinfoitem {
+    margin-left : .5em;
+}
+

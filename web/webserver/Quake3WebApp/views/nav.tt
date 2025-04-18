@@ -1,0 +1,11 @@
+        <div>
+            <nav>
+                <div><button form="form" name="rm" value="welcome" >Home    </button></div>
+                <div><button form="form" name="rm" value="servers" >Servers </button></div>
+                <div><button form="form" name="rm" value="settings">Settings</button></div>
+                [% IF admin == '1' %]
+                <div><button form="form" name="rm" value="admin">Admin</button></div>
+                [% END %]
+                <div><button form="form" name="rm" value="logout"  >Logout  </button></div>
+            </nav>
+        </div>

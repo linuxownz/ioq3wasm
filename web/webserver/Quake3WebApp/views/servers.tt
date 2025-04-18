@@ -1,0 +1,60 @@
+        [% USE Dumper              %]
+        [% # Dumper.dump ( servers ) %]
+
+        <form id="form" name="[% template_name %]" action="/" method="post">
+            <input type="hidden" name="flag" value="1"/>
+        </form>
+
+        <div class="container">
+            <header>[% appname %]</header>
+            [% INCLUDE nav.tt %]
+            <section class="main_section">
+                <!--div><h1 class="centertext">[%app.name  | html %] Welcome</h1></div-->
+                <div class="serverbrowser">Server Browser</div>
+                [% IF admin == '1' %]
+                <button form="form" name="rm" value="spawn_server">Spawn a new server</button>
+                [% END %]
+                <div class="browser-filters">
+                    <span>Game Types</span>
+                    <span><button data-gametype=""  class="filter-button">All game types</button></span>
+                    <span><button data-gametype="0" class="filter-button">Free For All</button></span>
+                    <span><button data-gametype="1" class="filter-button">1v1 Duel</button></span>
+                    <span><button data-gametype="3" class="filter-button">Team Death Match</button></span>
+                    <span><button data-gametype="4" class="filter-button">Capture The Flag</button></span>
+                </div>
+                <div class="servers">
+
+                    [% FOREACH server IN servers %]
+                    <div class="server" server_id="[% server.instance_id %]" data-gametype="[%server.json.serverinfo.item('g_gametype')%]">
+                        <span>
+                            <form name="play" action="/" method="post">
+                                <input type="hidden" name="flag"        value="1"/>
+                                <input type="hidden" name="rm"          value="play"/>
+                                <input type="hidden" name="instance_id" value="[% server.instance_id %]"/>
+                                <input type="image" class="playbutton" name="rm" style="max-width: 128px; max-height: 128px" src="/approot/[%server.levelshot | html %]" value="quake3"></input>
+                            </form>
+                        </span>
+                        <div>
+                            <div class="servername">[% server.server_name | html %]</div>
+                            <div class="serverinfo">
+                                [% FOREACH name IN serverinfo_names %]
+                                <span class="serverinfoitem" data-[% name %]="[% server.json.serverinfo.$name | html %]">[% # name | html %][% # server.json.serverinfo.$name | html %]</span>
+                                [% END %]
+                            </div>
+                            <div class="playerinfo">
+                                <div class="num_players" data-num-players="[% server.json.playerinfo.num_players  | html%]" data-max-clients="[% server.json.serverinfo.sv_maxclients | html %]"></div>
+                                [% FOREACH player IN server.json.playerinfo.players %]
+                                <div class="player" >
+                                    <span class="playerinfoitem" data-name="[% player.name | html  %]"></span>
+                                    <span class="playerinfoitem" data-ping="[% player.ping | html  %]"></span>
+                                </div>
+                                [% END %]
+                            </div>
+                        </div>
+                    </div>
+                    [% END %]
+
+                </div>
+            </section>
+            <footer/>
+        </div>

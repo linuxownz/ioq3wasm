@@ -1,0 +1,150 @@
+* {
+    box-sizing:border-box;
+    padding:0;
+    margin:0;
+}
+
+@font-face {
+    font-family:'starkillers';
+    src:url('/fonts/starkillers.ttf');
+}
+
+@font-face {
+    font-family:'newtown';
+    src:url('/fonts/newtown.ttf');
+}
+
+body {
+    cursor:url('/approot/aefbeb234a7d8501e23005ab3ab7fccf') 16 16, cell;
+    background-color:black;
+    /*background: url('/images/quake3bg.jpg') center / cover no-repeat;*/
+    background: url('/images/quake3bg.jpg') center / cover;
+    color: white;
+    font-family: arial, san serif;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+    overflow:hidden;
+}
+
+h1, h2 {
+    font-family:'newtown';
+    font-weight:bold;
+}
+
+.row-bg {
+    background: rgb(36, 32, 32);
+}
+
+.row-bg-alt {
+    background: rgb(28, 24, 24);
+}
+
+.container {
+    display: grid;
+    grid-template-columns: repeat(1,auto);
+    grid-template-rows: 120px 80px auto 60px;
+    height:100vh;
+    padding: 1vh;
+}
+
+header {
+    font-size: 46pt;
+    text-align: center;
+    grid-column:1;
+    grid-row:1;
+    font-family: 'StarKillers';
+}
+
+nav {
+    display:grid;
+    grid-template-rows: repeat(1,auto);
+    grid-column:1;
+    grid-row:2;
+    grid-gap: 50px;
+    Xwidth: 25%;
+    min-height: 80px;
+}
+
+ul.nav.nav-pills {
+    backdrop-filter: blur(1px);
+}
+
+nav div {
+    color: red;
+    grid-column:auto;
+    grid-row: 1;
+}
+
+nav div button {
+    backdrop-filter: blur(1px);
+    background-color: rgba( 242, 13, 13, 0.04 );
+    background:none;
+    border:none;
+    border-radius: 12px;
+    color:red;
+    font-family: 'newtown';
+    font-size: 24pt;
+    padding-top:    .1em;
+    padding-bottom: .1em;
+    padding-left:    1em;
+    padding-right:   1em;
+}
+
+section {
+    grid-column:1;
+    grid-row:3;
+}
+
+footer {
+    grid-column:1;
+    grid-row:4;
+}
+
+.logo {
+    display:block;
+    margin-left:auto;
+    margin-right: auto;
+    width: 500px;
+}
+
+.centertext {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#nav {
+    width: 85%;
+}
+
+.color_black {
+    color:black;
+}
+
+.color_red {
+    color:red;
+}
+
+.color_green {
+    color:green;
+}
+
+.color_yellow {
+    color: yellow;
+}
+
+.color_blue {
+    color:blue;
+}
+
+.color_cyan {
+    color:cyan;
+}
+
+.color_magenta {
+    color:magenta;
+}
+
+.color_white {
+    color:white;
+}

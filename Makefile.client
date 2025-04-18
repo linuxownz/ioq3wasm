@@ -1,0 +1,443 @@
+#
+# ioq3 Makefile client wasm
+#
+
+# we want to statically link to have one wasm binary
+# there will be no qvm, the vm will be removed
+# this means that all mods MUST live in game/cgame
+
+SHELL=/bin/bash
+
+DEBUG      ?= 0
+PROFILING  ?= 0
+STANDALONE ?= 0
+USE_OGG    ?= 0
+
+ifndef VERSION
+VERSION=1.36
+# TODO
+# VERSION=2.00
+endif
+
+ifndef BASEGAME
+BASEGAME=baseq3
+endif
+
+ifndef MISSIONPACK
+# TODO
+#MISSIONPACK=missionpack
+endif
+
+ifndef CODE_DIR
+CODE_DIR=code
+endif
+
+ifndef WED_DIR
+WEB_DIR=web
+endif
+
+ifndef BUILD_DIR
+BUILD_DIR=build/client/
+endif
+
+# Add git version info
+ifeq ($(wildcard .git),.git)
+ #GIT_REV=$(shell git show -s --pretty=format:%h-%ad --date=short)
+  GIT_REV=$(shell git show -s --pretty=format:%h)
+endif
+
+#############################################################################
+# SETUP AND BUILD -- LINUX EMSCRIPTEN
+#############################################################################
+# COMPILER FLAGS ############################################################
+
+# fails to compile when asking for debug info
+# emcc: error: running limited binaryen optimizations because DWARF info requested (or indirectly required) [-Wlimited-postlink-optimizations] [-Werror]
+# COMPILE_FLAGS = -Wall -Werror
+# TODO
+COMPILE_FLAGS  = -Wall
+COMPILE_FLAGS += -DCLIENT
+
+ifeq ($(USE_OGG),1)
+  COMPILE_FLAGS += -DUSE_OGG
+endif
+
+# https://emscripten.org/docs/porting/multimedia_and_graphics/OpenGL-support.html
+# https://registry.khronos.org/OpenGL-Refpages/es2.0/
+# COMPILE_FLAGS += -FULL_ES2 -FULL_ES3
+# COMPILE_FLAGS += -FULL_ES2
+
+# https://lyceum-allotments.github.io/2016/06/emscripten-and-sdl2-tutorial-part-4-look-owl/
+#COMPILE_FLAGS += -USE_SDL=2 -USE_SDL_IMAGE=2 -SDL2_IMAGE_FORMATS='["png"]'
+COMPILE_FLAGS += -sUSE_SDL=2
+COMPILE_FLAGS += -sUSE_SDL_MIXER=2
+#COMPILE_FLAGS += -sUSE_LIBJPEG=1
+COMPILE_FLAGS += -sUSE_LIBPNG
+
+ifeq ($(DEBUG), 1)
+  COMPILE_FLAGS += -DDEBUG
+endif
+
+# emcc --show-ports
+
+# https://reproducible-builds.org/specs/source-date-epoch/
+ifdef SOURCE_DATE_EPOCH
+	COMPILE_FLAGS += -DPRODUCT_DATE=\\\"$(shell date --date="@$$SOURCE_DATE_EPOCH" "+%b %_d %Y" | sed -e 's/ /\\\ /'g)\\\"
+endif
+
+COMPILE_FLAGS += -DVERSION="\"$(VERSION)\""
+COMPILE_FLAGS += -DGIT_REV="\"$(GIT_REV)\""
+
+COMPILE_FLAGS += -Wformat=2 -Wno-format-zero-length -Wformat-security -Wno-format-nonliteral
+COMPILE_FLAGS += -Wstrict-aliasing=2 -Wmissing-format-attribute
+COMPILE_FLAGS += -Wdisabled-optimization
+COMPILE_FLAGS += -Werror-implicit-function-declaration
+#COMPILE_FLAGS += -ferror-limit=10
+
+# ALIGNMENT ISSUES TONS OF ISSUES....
+COMPILE_FLAGS += -Wcast-align -Wover-aligned
+
+ifeq ($(USE_OGG), 1)
+COMPILE_FLAGS += -sUSE_OGG=1
+COMPILE_FLAGS += -sUSE_VORBIS
+COMPILE_FLAGS += -DUSE_CODEC_VORBIS
+endif
+
+COMPILE_FLAGS += -DUSE_OPENAL
+
+ifeq ($(DEBUG), 1)
+  COMPILE_FLAGS += -DOPENAL_DEBUG
+endif
+
+# DEBUGGING
+# -----------------------------
+# COMPILE_FLAGS += -g2
+# COMPILE_FLAGS += -g
+# COMPILE_FLAGS += -gsource-map
+#
+
+# https://github.com/emscripten-core/emscripten/issues/11425
+ifeq ($(DEBUG), 1)
+  COMPILE_FLAGS += -g
+# COMPILE_FLAGS += -gsource-map
+# COMPILE_FLAGS += -s DISABLE_EXCEPTION_CATCHING=0
+else
+  COMPILE_FLAGS += -O3
+endif
+
+ifeq ($(PROFILING),1 1)
+  COMPILE_FLAGS += --profiling
+endif
+
+# LINKER FLAGS ######################################################################################################
+
+ifeq ($(DEBUG), 1)
+  LINKER_FLAGS += --source-map-base /
+  LINKER_FLAGS += -s ASSERTIONS=1
+  LINKER_FLAGS += -gsource-map
+  LINKER_FLAGS += -Os  # to help isolcate only the func I use
+else
+  LINKER_FLAGS += -O3
+endif
+
+ifeq ($(PROFILING), 1)
+  LINKER_FLAGS += --profiling
+endif
+
+#LINKER_FLAGS += -sTOTAL_MEMORY=256MB
+LINKER_FLAGS += -sTOTAL_MEMORY=192MB
+#LINKER_FLAGS += -sTOTAL_MEMORY=512MB
+
+# LINKER_FLAGS += -sSTACK_SIZE=131072
+# working but maybe stack is too big TODO  trying to change large static buffers when I find them
+# LINKER_FLAGS += -sSTACK_SIZE=1048576
+#LINKER_FLAGS += -sSTACK_SIZE=262144 # this one blows up
+#LINKER_FLAGS += -sSTACK_SIZE=524288
+#LINKER_FLAGS += -sSTACK_SIZE=327680 # blows up
+
+LINKER_FLAGS += -sSTACK_SIZE=393216 # ok
+
+LINKER_FLAGS += -sALLOW_MEMORY_GROWTH=1
+
+
+#build just the js and wasm files see:
+# https://github.com/emscripten-core/emscripten/wiki/WebAssembly-Standalone
+# https://v8.dev/blog/emscripten-standalone-wasm
+ifeq ($(STANDALONE), 1)
+LINKER_FLAGS += -sSTANDALONE_WASM
+endif
+
+# LINKER_FLAGS += "-sEXPORTED_RUNTIME_METHODS['callMain']"
+
+# https://emscripten.org/docs/api_reference/fetch.html
+LINKER_FLAGS += -sFETCH
+
+# disable SAFE_HEAP if -fsanitize=address is enabled
+# disabled Dec28 maybe because if alignment fault could be a soft error
+# 15:35:19.272 RuntimeError: Aborted(alignment fault) quake3.js:574:40
+# https://github.com/emscripten-core/emscripten/blob/db9b1fbed657c6f1261ff635015abc36482b157a/src/settings.js#L322
+
+ifeq ($(DEBUG), 1)
+#LINKER_FLAGS += -sSAFE_HEAP=1
+  LINKER_FLAGS += -sSAFE_HEAP=2
+  LINKER_FLAGS += -sWARN_UNALIGNED=1
+
+  LINKER_FLAGS += -sSTACK_OVERFLOW_CHECK=1
+  LINKER_FLAGS += -sSTACK_OVERFLOW_CHECK=2
+  LINKER_FLAGS += -sASSERTIONS=1
+endif
+
+# LINKER_FLAGS += --emrun
+
+LINKER_FLAGS += -sUSE_LIBJPEG=1
+LINKER_FLAGS += -sUSE_SDL_MIXER=2
+
+LINKER_FLAGS += -lopenal
+LINKER_FLAGS += -lSDL2
+LINKER_FLAGS += -lwebsocket.js
+# to get browser support of image decoding just added not tested
+LINKER_FLAGS += -lbrowser.js
+
+# https://github.com/emscripten-core/emscripten/issues/4425 ????
+LINKER_FLAGS += -sUSE_WEBGL2=1
+LINKER_FLAGS += -sMIN_WEBGL_VERSION=2
+LINKER_FLAGS += -sMAX_WEBGL_VERSION=2
+#LINKER_FLAGS += -sGL_ENABLE_GET_PROC_ADDRESS
+
+LINKER_FLAGS += -lGL
+LINKER_FLAGS += -sFULL_ES2=1
+LINKER_FLAGS += -sFULL_ES3=1
+
+LINKER_FLAGS += -sEXIT_RUNTIME=1
+
+# LINKER_FLAGS += -sGL_ASSERTIONS=1
+# LINKER_FLAGS += -sTRACE_WEBGL_CALLS=1
+# LINKER_FLAGS += -sGL_DEBUG=1
+# LINKER_FLAGS += -sGL_TESTING=1
+# LINKER_FLAGS += -sGL_TRACK_ERRORS=1
+
+# LINKER_FLAGS += -fsanitize=undefined # too many locals
+# LINKER_FLAGS += -fsanitize=address
+
+CC=emcc
+
+CGAMESRCFILES = \
+ 	$(CODE_DIR)/cgame/cg_consolecmds.c \
+ 	$(CODE_DIR)/cgame/cg_draw.c \
+ 	$(CODE_DIR)/cgame/cg_drawtools.c \
+ 	$(CODE_DIR)/cgame/cg_effects.c \
+ 	$(CODE_DIR)/cgame/cg_ents.c \
+ 	$(CODE_DIR)/cgame/cg_event.c \
+ 	$(CODE_DIR)/cgame/cg_info.c \
+ 	$(CODE_DIR)/cgame/cg_localents.c \
+ 	$(CODE_DIR)/cgame/cg_main.c \
+ 	$(CODE_DIR)/cgame/cg_marks.c \
+ 	$(CODE_DIR)/cgame/cg_particles.c \
+ 	$(CODE_DIR)/cgame/cg_players.c \
+ 	$(CODE_DIR)/cgame/cg_playerstate.c \
+ 	$(CODE_DIR)/cgame/cg_predict.c \
+ 	$(CODE_DIR)/cgame/cg_scoreboard.c \
+ 	$(CODE_DIR)/cgame/cg_servercmds.c \
+ 	$(CODE_DIR)/cgame/cg_snapshot.c \
+ 	$(CODE_DIR)/cgame/cg_strafehud.c \
+ 	$(CODE_DIR)/cgame/cg_view.c \
+ 	$(CODE_DIR)/cgame/cg_weapons.c
+
+
+CLIENTSRCFILES = \
+ 	$(CODE_DIR)/client/cl_cgame.c \
+ 	$(CODE_DIR)/client/cl_console.c \
+ 	$(CODE_DIR)/client/cl_emscripten.c \
+ 	$(CODE_DIR)/client/cl_input.c \
+ 	$(CODE_DIR)/client/cl_keys.c \
+ 	$(CODE_DIR)/client/cl_main.c \
+ 	$(CODE_DIR)/client/cl_net_chan.c \
+ 	$(CODE_DIR)/client/cl_parse.c \
+ 	$(CODE_DIR)/client/cl_scrn.c \
+ 	$(CODE_DIR)/client/snd_adpcm.c \
+ 	$(CODE_DIR)/client/snd_codec.c \
+ 	$(CODE_DIR)/client/snd_codec_ogg.c \
+  	$(CODE_DIR)/client/snd_codec_wav.c \
+ 	$(CODE_DIR)/client/snd_main.c \
+ 	$(CODE_DIR)/client/snd_mem.c \
+ 	$(CODE_DIR)/client/snd_mix.c \
+ 	$(CODE_DIR)/client/snd_openal.c \
+ 	$(CODE_DIR)/client/snd_wavelet.c
+
+GAMESRCFILES = \
+ 	$(CODE_DIR)/game/bg_misc.c \
+ 	$(CODE_DIR)/game/bg_pmove.c \
+ 	$(CODE_DIR)/game/bg_slidemove.c
+
+QCOMMONSRCFILES = \
+ 	$(CODE_DIR)/qcommon/cmd_client.c \
+ 	$(CODE_DIR)/qcommon/cm_load_client.c \
+ 	$(CODE_DIR)/qcommon/cm_patch.c \
+ 	$(CODE_DIR)/qcommon/cm_polylib.c \
+ 	$(CODE_DIR)/qcommon/cm_test.c \
+ 	$(CODE_DIR)/qcommon/cm_trace.c \
+ 	$(CODE_DIR)/qcommon/common_client.c \
+ 	$(CODE_DIR)/qcommon/cvar.c \
+ 	$(CODE_DIR)/qcommon/files_client.c \
+ 	$(CODE_DIR)/qcommon/huffman.c \
+ 	$(CODE_DIR)/qcommon/msg.c \
+ 	$(CODE_DIR)/qcommon/net_chan.c \
+ 	$(CODE_DIR)/qcommon/net_ip_client.c \
+ 	$(CODE_DIR)/qcommon/net_ws_client.c \
+ 	$(CODE_DIR)/qcommon/puff.c \
+ 	$(CODE_DIR)/qcommon/q_math.c \
+ 	$(CODE_DIR)/qcommon/q_shared.c
+
+RENDERCOMMONSRCFILES = \
+ 	$(CODE_DIR)/renderercommon/tr_image_bmp.c \
+ 	$(CODE_DIR)/renderercommon/tr_image_jpg.c \
+ 	$(CODE_DIR)/renderercommon/tr_image_png.c \
+ 	$(CODE_DIR)/renderercommon/tr_image_tga.c \
+ 	$(CODE_DIR)/renderercommon/tr_noise.c
+
+RENDERGL2SRCFILES = \
+ 	$(CODE_DIR)/renderergl2/tr_animation.c \
+ 	$(CODE_DIR)/renderergl2/tr_backend.c \
+ 	$(CODE_DIR)/renderergl2/tr_bsp.c \
+ 	$(CODE_DIR)/renderergl2/tr_cmds.c \
+ 	$(CODE_DIR)/renderergl2/tr_curve.c \
+ 	$(CODE_DIR)/renderergl2/tr_dsa.c \
+ 	$(CODE_DIR)/renderergl2/tr_extensions.c \
+ 	$(CODE_DIR)/renderergl2/tr_extramath.c \
+ 	$(CODE_DIR)/renderergl2/tr_fbo.c \
+ 	$(CODE_DIR)/renderergl2/tr_flares.c \
+ 	$(CODE_DIR)/renderergl2/tr_fallback_shader.c \
+ 	$(CODE_DIR)/renderergl2/tr_glsl.c \
+ 	$(CODE_DIR)/renderergl2/tr_image.c \
+ 	$(CODE_DIR)/renderergl2/tr_image_dds.c \
+ 	$(CODE_DIR)/renderergl2/tr_init.c \
+ 	$(CODE_DIR)/renderergl2/tr_light.c \
+ 	$(CODE_DIR)/renderergl2/tr_main.c \
+ 	$(CODE_DIR)/renderergl2/tr_marks.c \
+ 	$(CODE_DIR)/renderergl2/tr_mesh.c \
+ 	$(CODE_DIR)/renderergl2/tr_model.c \
+ 	$(CODE_DIR)/renderergl2/tr_model_iqm.c \
+ 	$(CODE_DIR)/renderergl2/tr_postprocess.c \
+ 	$(CODE_DIR)/renderergl2/tr_scene.c \
+ 	$(CODE_DIR)/renderergl2/tr_shade.c \
+ 	$(CODE_DIR)/renderergl2/tr_shade_calc.c \
+ 	$(CODE_DIR)/renderergl2/tr_shader.c \
+ 	$(CODE_DIR)/renderergl2/tr_shader_helper.c \
+ 	$(CODE_DIR)/renderergl2/tr_shadows.c \
+ 	$(CODE_DIR)/renderergl2/tr_sky.c \
+ 	$(CODE_DIR)/renderergl2/tr_surface.c \
+ 	$(CODE_DIR)/renderergl2/tr_vbo.c \
+ 	$(CODE_DIR)/renderergl2/tr_world.c
+
+SHADERSRCFILES = \
+	$(CODE_DIR)/renderergl2/glsl/bokeh_fp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/bokeh_vp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/calclevels4x_fp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/calclevels4x_vp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/depthblur_fp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/depthblur_vp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/dlight_fp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/dlight_vp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/down4x_fp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/down4x_vp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/fogpass_fp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/fogpass_vp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/generic_fp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/generic_vp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/lightall_fp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/lightall_vp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/pshadow_fp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/pshadow_vp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/shadowfill_fp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/shadowfill_vp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/shadowmask_fp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/shadowmask_vp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/ssao_fp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/ssao_vp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/texturecolor_fp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/texturecolor_vp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/tonemap_fp.glsl \
+	$(CODE_DIR)/renderergl2/glsl/tonemap_vp.glsl
+
+SDLSRCFILES = \
+ 	$(CODE_DIR)/sdl/sdl_input.c \
+ 	$(CODE_DIR)/sdl/sdl_glimp.c \
+ 	$(CODE_DIR)/sdl/sdl_snd.c
+
+CONSRCFILES = \
+ 	$(CODE_DIR)/sys/con_console.c \
+ 	$(CODE_DIR)/sys/con_log.c
+
+SYSSRCFILES = \
+ 	$(CODE_DIR)/sys/sys_main_client.c \
+ 	$(CODE_DIR)/sys/sys_unix_client.c
+
+WEBPAGESRCFILES = \
+ 	$(CODE_DIR)/web/quake3.html
+
+# PREJSSRCFILE = \
+# 	$(CODE_DIR)/web/pre.js
+
+CGAMEOBJS        := $(CGAMESRCFILES:%=$(BUILD_DIR)/%.o)
+CLIENTOBJS       := $(CLIENTSRCFILES:%=$(BUILD_DIR)/%.o)
+GAMEOBJS         := $(GAMESRCFILES:%=$(BUILD_DIR)/%.o)
+QCOMMONOBJS      := $(QCOMMONSRCFILES:%=$(BUILD_DIR)/%.o)
+RENDERCOMMONOBJS := $(RENDERCOMMONSRCFILES:%=$(BUILD_DIR)/%.o)
+RENDERGL2OBJS    := $(RENDERGL2SRCFILES:%=$(BUILD_DIR)/%.o)
+SDLOBJS          := $(SDLSRCFILES:%=$(BUILD_DIR)/%.o)
+CONOBJS          := $(CONSRCFILES:%=$(BUILD_DIR)/%.o)
+SYSOBJS          := $(SYSSRCFILES:%=$(BUILD_DIR)/%.o)
+
+ALLOBJS := $(CGAMEOBJS) $(CLIENTOBJS) $(GAMEOBJS) $(QCOMMONOBJS) $(RENDERCOMMONOBJS) $(RENDERGL2OBJS) $(CONOBJS) $(SYSOBJS)
+
+ALLSRCFILES := $(CGAMESRCFILES) $(CLIENTSRCFILES) $(GAMESRCFILES) $(QCOMMONSRCFILES) $(RENDERCOMMONSRCFILES) $(RENDERGL2SRCFILES) $(CONSRCFILES) $(SYSSRCFILES)
+
+ALLOBJS += $(SDLOBJS)
+ALLSRCFILES += $(SDLSRCFILES)
+
+TARGET = quake3.js
+TARGET = quake3.wasm
+TARGET = quake3.html
+
+# PREJS = --pre-js=$(PREJSSRCFILE)
+
+# strip MY NAME from builds
+# strip MY NAME from builds
+
+.PHONY: all clean
+
+all: pre-build build
+
+pre-build:
+	$(shell ./bin/make_shader.sh)
+	$(shell ./bin/make_tags.sh)
+	$(shell ./bin/make_cscope.sh)
+	@touch ./code/sys/sys_main_client.c
+
+build: $(BUILD_DIR)/$(TARGET)
+
+$(BUILD_DIR)/$(TARGET): $(ALLOBJS)
+	$(CC) $(ALLOBJS) -o $@ $(LINKER_FLAGS)
+	@echo
+
+$(BUILD_DIR)/%.c.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) -c $(COMPILE_FLAGS) $< -o $@
+	@echo
+
+clean:
+	@rm -rf ./$(BUILD_DIR)
+	@echo
+
+docs:
+	doxygen ioquake3_doc.doxygen
+
+listsourcefiles:
+	@echo $(ALLSRCFILES)
+
+showcompileflags:
+	@echo $(COMPILE_FLAGS)
+
+showlinkerflags:
+	@echo $(LINKER_FLAGS)
+

@@ -1,0 +1,22 @@
+        <form id="form" name="[% template_name %]" action="/" method="post">
+            <input type="hidden" name="flag" value="1"/>
+        </form>
+
+        <div class="container">
+            <header>[% appname %]</header>
+            [% INCLUDE nav.tt %]
+            <section class="main_section">
+                <h1 class="centertext">[%app.name%] Welcome</h1>
+                <div id="content">
+                    Hello [% fullname %], Welcome to [% appname %]
+                    <div id="content-div">
+                        <ul>
+                            <li>Quake3 in your browser</li>
+                            <li>Click Servers to begin</li>
+                            <li>check out http://www.quakejs.com</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            <footer></footer>
+        </div>

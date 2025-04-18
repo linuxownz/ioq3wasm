@@ -1,0 +1,29 @@
+#!/bin/bash
+set -eu
+
+PATH_TO_CONF="./conf/lighttpd/lighttpd.conf"
+PATH_TO_CONF="./conf/lighttpd.conf"
+
+gitroot=$(git rev-parse --show-toplevel)
+cwd=$(pwd)
+# cd ./web/webserver/quake3webapp/
+cd ./web/webserver/Quake3WebApp/
+
+echo "Starting Lighttpd webserver serving up Quake3WebApp/"
+
+set +eu
+killall lighttpd; 
+set -eu
+
+sleep 1; 
+
+# lighttpd -f $PATH_TO_CONF  -tt # -D
+
+# echo starting in foreground
+sudo lighttpd -f $PATH_TO_CONF # -D
+
+# tail -f ./var/log/lighttpd/*.log &
+# 
+# read toexit
+# 
+# killall lighttpd

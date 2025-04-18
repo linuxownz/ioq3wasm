@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# branch=$(git rev-parse --abbrev-ref HEAD)
+# PATHS=
+# 
+# if [[ $branch == 'client' ]]; then
+#     #PATHS="./cgame ./client ./game ./qcommon ./renderercommon ./renderergl2 ./sdl ./sys $EMSDK/upstream/emscripten/cache/sysroot/include/"
+#     PATHS="./cgame ./client ./game ./qcommon ./renderercommon ./renderergl2 ./sdl ./sys "
+# elif [[ $branch == 'server' ]]; then
+#     PATHS="./botlib ./game ./qcommon ./server ./sys ./wsServer/include"
+# else
+#     echo "unknown branch"
+# fi
+
+# PATHS="botlib cgame client game qcommon renderercommon renderergl2 sdl server sys webgl2 wsServer"
+PATHS="botlib cgame client game qcommon renderercommon renderergl2 sdl server sys"
+
+grep -E --color=always -r "$@"  $PATHS

@@ -1,0 +1,10 @@
+#content {
+    font-size: x-large;
+    width: 65%;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+li {
+    list-style-image: url('/favicon.ico');
+}

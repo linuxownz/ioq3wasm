@@ -1,0 +1,169 @@
+        [% USE Dumper %] [% # Dumper.dump ( json ) %]
+
+        <form id="form" name="[% template_name %]" action="/" method="post">
+            <input type="hidden" name="flag" value="1"/>
+        </form>
+
+        <div class="emscripten_canvas_container">
+            <canvas class="emscripten_canvas" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+            <div id="io">
+                <textarea class="emscripten_output" id="output" rows="20" style="width:100%" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+                <input    class="emscripten_input"  id="input" type="text"/>
+            </div>
+        </div>
+
+        <div class="html_overlay">
+            <div id="menu">
+                <div id="nonteam">
+                    <table>
+                        <thead>
+                            <tr>
+                                <td></td>
+                                <td>Name</td>
+                                <td>Ping</td>
+                                <td>Time</td>
+                                <td>Score</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+
+                    <!-- specs -->
+                    <table>
+                        <thead>
+                            <tr><td colspan="5">Spectators</td></tr>
+                            <tr>
+                                <td></td>
+                                <td>Name</td>
+                                <td>Ping</td>
+                                <td>Time</td>
+                                <td>Score</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="team">
+                    <table>
+                        <thead>
+                            <tr>
+                                <td></td>
+                                <td colspan="3" style="color: red">RED TEAM</td>
+                                <td id="red_score">0</td>
+                                <td></td>
+                                <td></td>
+                                <td id="blue_score">0</td>
+                                <td colspan="3" style="color:blue">BLUE TEAM</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Name</td>
+                                <td>Ping</td>
+                                <td>Time</td>
+                                <td>Score</td>
+                                <td></td>
+                                <td></td>
+                                <td>Name</td>
+                                <td>Ping</td>
+                                <td>Time</td>
+                                <td>Score</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+
+                    <!-- specs -->
+                    <table>
+                        <thead>
+                            <tr><td colspan="4">Spectators</td></tr>
+                            <tr>
+                                <td>Name</td>
+                                <td>Ping</td>
+                                <td>Time</td>
+                                <td>Score</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="html_overlay">
+            <div id="menu">
+                <div id="escape_menu">
+                    <div>Join Red</div>
+                    <div>Join Blue</div>
+                    <div>Join Team Free</div>
+                    <div>Join Spectators</div>
+                    <!--div>Settings</div-->
+                    <div>Resume game</div>
+                    <div>Exit game</div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="container">
+            <header>[% appname %]</header>
+            [% INCLUDE nav.tt %]
+
+            <script>
+                var server_name = '[% server_name | html %]';
+                var instance_id = '[% instance_id | html %]';
+                var mapname     = '[% mapname     | html %]';
+                var port        = '[% port        | html %]';
+            </script>
+            <section class="main_section" style="background-image: url('/approot/[% levelshot %]')">
+                <div class="serverinfo">
+                    <span>
+                        <div class="serverinfoitem"><span>Map Name:        </span><span>[% json.serverinfo.mapfullname   | html %] ([% json.serverinfo.mapname | html %])</span></div>
+                        <div class="serverinfoitem"><span>Game Type:       </span><span>[% json.serverinfo.g_gametypestr | html %]</span></div>
+                        <div class="serverinfoitem"><span>Time Limit:      </span><span>[% json.serverinfo.timelimit     | html %]</span></div>
+                        <div class="serverinfoitem"><span>Frag Limit:      </span><span>[% json.serverinfo.fraglimit     | html %]</span></div>
+                        <!--div class="serverinfoitem"><span>DeathMatch Flags:</span><span>[% json.serverinfo.dmflags      | html %]</span></div-->
+                        <div class="serverinfoitem"><span>Capture Limit:   </span><span>[% json.serverinfo.capturelimit  | html %]</span></div>
+                        <!--div class="serverinfoitem"><span>:</span> <span>[% json.serverinfo.xxx | html %]</span></div-->
+                    </span>
+                    <span class="serverinfoitem">
+                        <div class="playerinfo">
+                            <span class="num_players" data-num-players="[% json.playerinfo.num_players  | html %]" data-max-clients="[% json.serverinfo.sv_maxclients | html %]"></span>
+                            [% FOREACH player IN json.playerinfo.players %]
+                            <div class="player" >
+                                [% FOREACH name IN playerinfo_names %]
+                                <span class="playerinfoitem" data-[% name  | html %]="[% player.$name  | html %]"></span>
+                                [% END %]
+                            </div>
+                            [% END %]
+                        </div>
+                    </span>
+                    <div class="playbutton">
+                        <button id="playbutton" onXXclick="play(); return false;">Fight</button>
+                    </div>
+
+                    <div id="progress_container">
+                        <div>
+                            <label id="prog_label" for='progress'>Loading ...</label>
+                        </div>
+                        <div>
+                            <progress id='progress' max="100" value="0">
+                        </div>
+                    </div>
+
+                </div>
+                <form name="WELCOME" action="/" method="post">
+                    <input type="hidden" name="flag" value="1">
+                    <input type="hidden" name="rm"   value="welcome">
+                </form>
+            </section>
+
+        </div>
+
+        <script type="text/javascript" src="/js/q3loader.js"></script>
+        <script type="text/javascript" src="/js/quake3.js"  ></script>
+

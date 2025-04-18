@@ -1,0 +1,67 @@
+/* works */
+span.serverinfoitem[data-mapname]:before {
+    content:attr(data-mapname);
+}
+
+span.serverinfoitem[data-mapfullname]:before {
+    content:attr(data-mapfullname);
+}
+
+/*
+ * game types 0: FFA
+ *            1: TOURNAMENT
+ *            2: SINGLE_PLAYER
+ *            3: TEAM ( DEATHMATCH )
+ *            4: CTF
+ * (MISSION)  5: 1FCTF
+ * (MISSION)  6: OBELISK
+ * (MISSION)  7: HARVESTER
+ *
+ *
+ */
+
+span.serverinfoitem[data-g_gametypestr]:before {
+    content:"Game Type: " attr(data-g_gametypestr);
+}
+
+span.serverinfoitem[data-fraglimit]:before {
+    content:"Frag Limit:" attr(data-fraglimit);
+}
+
+span.serverinfoitem[data-timelimit]:before {
+    content:"Time Limit:" attr(data-timelimit);
+}
+
+/*
+ * on 3 flags no falling, fixed fov and no footsteps...
+span.serverinfoitem[data-dmflags]:before {
+    color: green;
+    content:"Deathmatch:" attr(data-dmflags);
+}*/
+
+span.num_players:before {
+    content:"Players: " attr(data-num-players) ' / ' attr(data-max-clients);
+}
+
+span.playerinfoitem[data-name]:before {
+    content:"Name:" attr(data-name);
+}
+
+span.playerinfoitem[data-handicap]:before {
+    content:"Handicap: " attr(data-handicap);
+}
+
+span.playerinfoitem[data-rate]:before {
+    content:"Rate: " attr(data-rate);
+}
+
+span.playerinfoitem[data-snaps]:before {
+    content:"Snaps: " attr(data-snaps);
+}
+
+span.playerinfoitem[data-ping]:before {
+    content:"Ping:" attr(data-ping) "ms";
+}
+
+
+

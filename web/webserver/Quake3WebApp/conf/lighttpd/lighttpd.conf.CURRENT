@@ -1,0 +1,208 @@
+#######################################################################
+##
+## quake3 web app lighttpd.conf
+##
+#######################################################################
+
+# https://redmine.lighttpd.net/boards/2/topics/1833
+# https://redmine.lighttpd.net/projects/lighttpd/wiki
+# https://redmine.lighttpd.net/projects/lighttpd/wiki/ApplicationsUsingLighttpd <<<<<
+
+server.username  = "<you>"
+server.groupname = "<you>"
+
+index-file.names += ( "index.html" )
+
+url.access-deny  = ( "~", ".inc" )
+url.access-allow = ( ".jpg", ".png", ".js", ".css" )
+
+# static-file.exclude-extensions = ( ".cfg", ".conf", ".db", ".fcgi", ".log", ".pid", ".pl", ".pm", ".scgi", ".swp", ".template", ".tt" )
+static-file.exclude-extensions = ( ".conf", ".db", ".fcgi", ".log", ".pid", ".pl", ".pm", ".scgi", ".swp", ".template", ".tt" )
+
+# var.home_dir    = "/home/<you>/Projects/IOQuake3/ioq3wasm/web/webserver/quake3webapp/"
+var.home_dir    = var.CWD
+
+var.log_root    = home_dir + "/var/log/lighttpd"
+var.server_root = home_dir + "/static"
+var.state_dir   = home_dir + "/var/run/lighttpd"
+var.conf_dir    = home_dir + "/conf/lighttpd/conf.d/"
+var.socket_dir  = home_dir + "/var/sock"
+var.script_dir  = home_dir + "/script"
+var.cache_dir   = home_dir + "/var/cache/lighttpd"
+
+include conf_dir + "/access_log.conf"
+include conf_dir + "/debug.conf"
+include conf_dir + "/mime.conf"
+
+server.modules      += ("mod_setenv", "mod_expire", "mod_fastcgi", "mod_rewrite", "mod_openssl") # adding mod_rewrite may have fixed it
+server.document-root = server_root
+server.port          = 443
+server.pid-file      = state_dir + "/lighttpd.pid"
+server.errorlog      = log_root + "/error.log"
+server.max-fds       = 16384
+server.tag           = "quake3webserver"
+
+ssl.engine = "enable"
+ssl.privkey          = "/etc/certs/private.key.pem"
+ssl.pemfile          = "/etc/certs/domain.cert.pem"
+
+debug.log-request-handling = "enable"
+
+# https://github.com/benyaminsalimi/Secure-Headers
+setenv.add-response-header = (
+#   "Content-Security-Policy"      => "script-src 'self'; object-src 'self'",
+    "Cross-Origin-Embedder-Policy" => "require-corp",
+    "Cross-Origin-Opener-Policy"   => "same-origin",
+    "X-Frame-Options"              => "DENY",
+    "X-XSS-Protection"             => "1; mode=block",
+    "X-Content-Type-Options"       => "nosniff",
+    "Strict-Transport-Security"    => "max-age=15768000; includeSubdomains",
+    "Referrer-Policy"              => "no-referrer",
+    "Feature-Policy"               => "accelerometer 'none'; camera 'none'; geolocation 'none'; gyroscope 'none'; magnetometer 'none'; microphone 'none'; payment 'none'; usb 'none'"
+#   "Clear-Site-Data"              => " cache "
+#   "Clear-Site-Data"              => " *  " # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Clear-Site-Data
+)
+
+# "check-local": is optional and may be "enable" (default) or "disable".
+# If enabled
+#   the server first checks for a file in local 'server.docuhment-root' tree
+#       if no such file
+#           returns 404 (Not Found) and does not fall back to FastCGI.
+# If disabled
+#   the server forwards a request to the FastCGI interface without this check.
+
+# logging
+# https://redmine.lighttpd.net/projects/lighttpd/wiki/Mod_accesslog <<<< TODO
+# logging
+
+$HTTP["host"] == "localhosty.com" {
+
+#   # LEFT OFF HERE ALMOST WORKING
+#   $HTTP["url"] == "^/approot/.*$" {
+#       url.rewrite-once = ( "^/approot/\(.*\)$" => "/?file=$1" )
+#   }
+
+    $HTTP["url"] == "/approot/q3config.cfg" {
+        fastcgi.server = (
+            "/approot/q3config.cfg" => (
+            "quake3webserver" => (
+                    "debug"       => 1,
+                    "bin-path"    => script_dir + "/webapp.fcgi",
+                    "min-procs"   => 1,
+                    "max-procs"   => 4,
+                    "socket"      => "/tmp/perl.socket",
+                    "x-sendfile"  => 0,
+             "x-sendfile-docroot" => ( server_root ),
+                    "check-local" => "disable"
+                )
+            )
+        )
+    }
+
+    $HTTP["url"] =~ "/approot/filelist.*" {
+        fastcgi.server = (
+            "/" => (
+            "quake3webserver" => (
+                    "debug"       => 1,
+                    "bin-path"    => script_dir + "/webapp.fcgi",
+                    "min-procs"   => 1,
+                    "max-procs"   => 4,
+                    "socket"      => "/tmp/perl.socket",
+                    "x-sendfile"  => 0,
+             "x-sendfile-docroot" => ( server_root ),
+                    "check-local" => "disable"
+                )
+            )
+        )
+    }
+
+    $HTTP["url"] =~ "/approot/shader.list" {
+        fastcgi.server = (
+            "/" => (
+            "quake3webserver" => (
+                    "debug"       => 1,
+                    "bin-path"    => script_dir + "/webapp.fcgi",
+                    "min-procs"   => 1,
+                    "max-procs"   => 4,
+                    "socket"      => "/tmp/perl.socket",
+                    "x-sendfile"  => 0,
+             "x-sendfile-docroot" => ( server_root ),
+                    "check-local" => "disable"
+                )
+            )
+        )
+    }
+
+    $HTTP["url"] == "/" {
+#expire.url = ( "" => "access plus 1 seconds" )
+        fastcgi.server = (
+            "/" => (
+            "quake3webserver" => (
+                    "debug"       => 1,
+                    "bin-path"    => script_dir + "/webapp.fcgi",
+                    "min-procs"   => 1,
+                    "max-procs"   => 4,
+                    "socket"      => "/tmp/perl.socket",
+                    "x-sendfile"  => 1,
+             "x-sendfile-docroot" => ( server_root ),
+                    "check-local" => "disable"
+                )
+            )
+        )
+    }
+
+}
+
+# https://stackoverflow.com/questions/2988217/testing-fastcgi-script-in-perl-using-standalone-perl-fastcgi-fcgi-web-server
+#
+# $HTTP["url"] =~ "^/[^/]*$" {
+#     fastcgi.server = (
+#         "/" => ((
+#             "socket" => "/tmp/myapp.sock",
+#             "bin-path" => "/path/to/my/fastcgi/script.pl",
+#             "check-local" => "disable",
+#             "allow-x-send-file" => "enable",
+#         )),
+#     )
+# }
+#
+# # Use this if you also want to serve static files directly (not through your CGI app).
+# $HTTP["url"] =~ "^/static/.*$" {
+#     url.rewrite-once = ( "^/static/\(.*\)$" => "static/$1" )
+# }
+
+#######################################################################
+##
+##  SSL Support
+## -------------
+##
+## https://wiki.lighttpd.net/Docs_SSL
+#
+## To enable SSL for the whole server you have to provide a valid
+## certificate and have to enable the SSL engine.::
+##
+##   server.modules += ( "mod_openssl" )
+##
+##   ssl.privkey = "/path/to/privkey.pem"
+##   ssl.pemfile = "/path/to/fullchain.pem"
+##   # ssl.pemfile should contain the sorted certificate chain, including
+##   # intermediate certificates, as provided by the certificate issuer.
+##   # If both privkey and cert are in same file, specify only ssl.pemfile.
+##
+##   # Check your cipher list with: openssl ciphers -v '...'
+##   # (use single quotes with: openssl ciphers -v '...'
+##   #  as your shell won't like ! in double quotes)
+##   #ssl.cipher-list            = "PROFILE=SYSTEM"
+##
+##   # (recommended to accept only TLSv1.2 and TLSv1.3)
+##   #ssl.openssl.ssl-conf-cmd = ("MinProtocol" => "TLSv1.2")  # default
+##
+##   $SERVER["socket"] == "*:443" {
+##     ssl.engine  = "enable"
+##   }
+##   $SERVER["socket"] == "[::]:443" {
+##     ssl.engine  = "enable"
+##   }
+##
+#######################################################################
+

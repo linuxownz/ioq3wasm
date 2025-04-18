@@ -1,0 +1,1095 @@
+    <form id="form" name="[% template_name %]" action="/" method="post">
+        <input type="hidden" name="flag" value="1"/>
+    </form>
+
+    <script>
+        var keys = JSON.parse("[% keys.dquote %]");
+    </script>
+
+    <dialog id="bindDialog">
+        <div id="bindDialogContent">
+            <div>Type a key to bind <span id="bindaction"></span></div>
+            <div>
+                <p><span id="bindkeys"/></p>
+                <span><button id="bindDialogKeyboard">&#x2328;</button></span>
+                <span><button id="bindDialogMouse" title="Hover over here and click mouse button, use mouse wheel">   &#x1f5b1;</button></span>
+            </div>
+            <div>Esc to exit, Backspace to unbind all </div>
+            <div>Hover over mouse image and click or use mousewheel to set </div>
+            <form method="dialog">
+                <button id="bindDialogExit">Exit</button>
+            </form>
+        </div>
+
+        <div id="keyboard">
+            <!-- https://codepen.io/irajsuhail -->
+            <div class="keyboard-base">
+                <div data-key="~" class="key">~</div>
+                <div data-key="1" class="key">1</div>
+                <div data-key="2" class="key">2</div>
+                <div data-key="3" class="key">3</div>
+                <div data-key="4" class="key">4</div>
+                <div data-key="5" class="key">5</div>
+                <div data-key="6" class="key">6</div>
+                <div data-key="7" class="key">7</div>
+                <div data-key="8" class="key">8</div>
+                <div data-key="9" class="key">9</div>
+                <div data-key="0" class="key">0</div>
+                <div data-key="-" class="key">-</div>
+                <div data-key="+" class="key">+</div>
+                <div data-key="DEL" class="key delete">Delete</div>
+                <div data-key="TAB" class="key tab">Tab</div>
+                <div data-key="Q" class="key">Q</div>
+                <div data-key="W" class="key">W</div>
+                <div data-key="E" class="key">E</div>
+                <div data-key="R" class="key">R</div>
+                <div data-key="T" class="key">T</div>
+                <div data-key="Y" class="key">Y</div>
+                <div data-key="U" class="key">U</div>
+                <div data-key="I" class="key">I</div>
+                <div data-key="O" class="key">O</div>
+                <div data-key="P" class="key">P</div>
+                <div data-key="[" class="key">[</div>
+                <div data-key="]" class="key">]</div>
+                <div data-key="\" class="key backslash">\</div>
+                <div data-key="" class="key capslock">CapsLock</div>
+                <div data-key="A" class="key">A</div>
+                <div data-key="S" class="key">S</div>
+                <div data-key="D" class="key">D</div>
+                <div data-key="F" class="key">F</div>
+                <div data-key="G" class="key">G</div>
+                <div data-key="H" class="key">H</div>
+                <div data-key="J" class="key">J</div>
+                <div data-key="K" class="key">K</div>
+                <div data-key="L" class="key">L</div>
+                <div data-key=";" class="key">;</div>
+                <div data-key="'" class="key">'</div>
+                <div data-key="ENTER" class="key return">Return</div>
+                <div data-key="SHIFT" class="key leftshift">Shift</div>
+                <div data-key="Z" class="key">Z</div>
+                <div data-key="X" class="key">X</div>
+                <div data-key="C" class="key">C</div>
+                <div data-key="V" class="key">V</div>
+                <div data-key="B" class="key">B</div>
+                <div data-key="N" class="key">N</div>
+                <div data-key="M" class="key">M</div>
+                <div data-key="," class="key">,</div>
+                <div data-key="." class="key">.</div>
+                <div data-key="/" class="key">/</div>
+                <div data-key="SHIFT" class="key rightshift">Shift</div>
+                <div data-key="CTRL" class="key leftctrl">Ctrl</div>
+                <div data-key="META" class="key command"><img class="tux"src="/images/tux.png"></div>
+                <div data-key="ALT" class="key">Alt</div>
+                <div data-key="SPACE" class="key space">Space</div>
+                <div data-key="ALT" class="key">Alt</div>
+                <div data-key="META" class="key command"><img class="tux" src="/images/tux.png"></div>
+                <div data-key="CTRL" class="key">Ctrl</div>
+                <!--div data-key="" class="key"></div-->
+            </div>
+        </div>
+    </dialog>
+
+    <div class="container">
+        <header>[% appname %]</header>
+        [% INCLUDE nav.tt %]
+        <section class="main_section">
+            <div class="settings_main">
+
+                <div id="nav" class="container-fluid">
+                    <h1>Game Settings</h1>
+                    <ul class="nav nav-pills">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#input_page">Input</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#move_page">Movement</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#action_page">Action</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#weapon_page">Weapons</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#basic_page">Basic</a>
+                        </li>
+                        <!--li class="nav-item">
+                            <a class="nav-link" href="#">Weapon</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Video</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Sound</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Spectating</a>
+                        </li-->
+                    </ul>
+                </div>
+
+                <div class="scroll-container">
+
+                    <div class="scroll-page" id="input_page">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h2>Mouse Settings</h2>
+                            </div>
+                        </div>
+
+                        <div class="row align-items-center">
+                            <div class="col">
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                <label for="sensitivity">Mouse Sensitivity</label>
+                            </div>
+                            <div class="col">
+                                <div class="col d-flex align-items-center">
+                                    <input type="range"  id="sensitivity"  name="sensitivity" min="0" max="10" step="0.1" value="[% config.sensitivity | html %]" class="cvar-input"
+                                                                                                                         oninput="document.getElementById('_sensitivity').value=this.value" />
+                                    <input type="number" id="_sensitivity" name="sensitivity" min="0" max="10" step="0.1" value="[% config.sensitivity | html %]" class="cvar-input"
+                                                                                                                         oninput="document.getElementById('sensitivity').value=this.value" />
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                <label for="cl_mouseAccel">Mouse Acceleration</label>
+                            </div>
+                            <div class="col">
+                                <div class="col d-flex align-items-center">
+                                    <input type="range"  id="cl_mouseAccel"  name="cl_mouseAccel" min="0" max="10" step="0.1" value="[% config.cl_mouseAccel | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('_cl_mouseAccel').value=this.value" />
+                                    <input type="number" id="_cl_mouseAccel" name="cl_mouseAccel" min="0" max="10" step="0.1" value="[% config.cl_mouseAccel | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('cl_mouseAccel').value=this.value" />
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">
+                                <label for="cl_mouseAccelOffset">Mouse Acceleration Offset</label>
+                            </div>
+                            <div class="col">
+                                <div class="col d-flex align-items-center">
+                                    <input type="range"  id="cl_mouseAccelOffset"  name="cl_mouseAccelOffset" min="0" max="10" step="0.1" value="[% config.cl_mouseAccelOffset | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('_cl_mouseAccelOffset').value=this.value" />
+                                    <input type="number" id="_cl_mouseAccelOffset" name="cl_mouseAccelOffset" min="0" max="10" step="0.1" value="[% config.cl_mouseAccelOffset | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('cl_mouseAccelOffset').value=this.value" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Mouse Accel Style</div>
+                            <div class="col">
+                                <select title="Mouse Accel Style" name="cg_mouseAccelStyle" class="form-input cvar-input" >
+                                    <option value="0" [%     config.item('cg_mouseAccelStyle') and "selected" %]>Style 1 ( default )</option>
+                                    <option value="1" [% not config.item('cg_mouseAccelStyle') and "selected" %]>Style 2</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="scroll-page" id="move_page">
+
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h2>Movement</h2>
+                            </div>
+                        </div>
+
+                        <div class="row align-items-center">
+                            <div class="col">
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                Move Forward
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Move Forward" name="+forward" class="form-input bind-input" value="[% binds.item('+forward').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                Move Back
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Move Back" name="+back" class="form-input bind-input" value="[% binds.item('+back').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">
+                                Move Left
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Move Left" name="+moveleft" class="form-input bind-input" value="[% binds.item('+moveleft').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">
+                                Move Right
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Move Right" name="+moveright" class="form-input bind-input" value="[% binds.item('+moveright').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                Jump
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Jump" name="+moveup" class="form-input bind-input" value="[% binds.item('+moveup').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                Crouch
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Crouch" name="+movedown" class="form-input bind-input" value="[% binds.item('+movedown').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">
+                                Walk
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Walk" name="+speed" class="form-input bind-input" value="[% binds.item('+speed').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="scroll-page" id="action_page">
+
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h2>Actions</h2>
+                            </div>
+                        </div>
+
+                        <div class="row align-items-center">
+                            <div class="col">
+                            </div>
+                        </div>
+
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                Attack
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Attack" name="+attack" class="form-input bind-input" value="[% binds.item('+attack').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+                        <!--div class="row row-bg align-items-center">
+                            <div class="col">
+                                Last Weapon
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Last Weapon" name="" class="form-input bind-input" value="[% # binds.item('').join(' ').dquote | html %]"/>
+                            </div>
+                        </div-->
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">
+                                Next Weapon
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Next Weapon" name="weapnext" class="form-input bind-input" value="[% binds.item('weapnext').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">
+                                Previous Weapon
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Previous Weapon" name="weapprev" class="form-input bind-input" value="[% binds.item('weapprev').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                Zoom
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Zoom" name="+zoom" class="form-input bind-input" value="[% binds.item('+zoom').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                Use Item
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Use Item" name="+button2" class="form-input bind-input" value="[% binds.item('+button2').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">
+                                Taunt
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Taunt" name="+button3" class="form-input bind-input" value="[% binds.item('+button3').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">
+                                Drop Flag Powerup Weapon
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Drop Flag Powerup Weapon" name="drop" class="form-input bind-input" value="[% binds.item('drop').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+                        <!--div class="row row-bg align-items-center">
+                            <div class="col">
+                                Drop Weapon
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Drop Weapon" name="+dropX" class="form-input bind-input" value="[% binds.item('+dropX').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                Drop Powerup
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Drop Powerup" name="+dropX" class="form-input bind-input" value="[% binds.item('+dropX').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">
+                                Drop Rune
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Drop Rune" name="+dropX" class="form-input bind-input" value="[% binds.item('+dropX').join(' ').dquote | html %]"/>
+                            </div>
+                        </div-->
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">
+                                Self Kill
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Self Kill" name="kill" class="form-input bind-input" value="[% binds.item('kill').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                Scoreboard
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Scoreboard" name="+scores" class="form-input bind-input" value="[% binds.item('+scores').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                Vote Yes
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Vote Yes" name="vote yes" class="form-input bind-input" value="[% binds.item('vote yes').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">
+                                Vote No
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Vote No" name="vote no" class="form-input bind-input" value="[% binds.item('vote no').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">
+                                Ready up
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Ready up" name="ready" class="form-input bind-input" value="[% binds.item('ready').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                Screenshot
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Screenshot" name="screenshot" class="form-input bind-input" value="[% binds.item('screenshot').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                Talk
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Talk" name="messagemode" class="form-input bind-input" value="[% binds.item('messagemode').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">
+                                Team Talk
+                            </div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Team Talk" name="messagemode2" class="form-input bind-input" value="[% binds.item('messagemode2').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="scroll-page" id="weapon_page">
+
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h2>Weapons</h2>
+                            </div>
+                        </div>
+
+                        <div class="row align-items-center">
+                            <div class="col">
+                            </div>
+                        </div>
+
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Gauntlet</div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Gauntlet" name="weapon 1" class="form-input bind-input" value="[% binds.item('weapon 1').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Machine Gun</div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Machine Gun" name="weapon 2" class="form-input bind-input" value="[% binds.item('weapon 2').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Shotgun</div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Shotgun" name="weapon 3" class="form-input bind-input" value="[% binds.item('weapon 3').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Grenade Launcher</div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Grenade Launcher" name="weapon 4" class="form-input bind-input" value="[% binds.item('weapon 4').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Rocket Launcher</div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Rocket Launcher" name="weapon 5" class="form-input bind-input" value="[% binds.item('weapon 5').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Lightning Gun</div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Lightning Gun" name="weapon 6" class="form-input bind-input" value="[% binds.item('weapon 6').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Rail Gun</div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Rail Gun" name="weapon 7" class="form-input bind-input" value="[% binds.item('weapon 7').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Plasma Gun</div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Plasma Gun" name="weapon 8" class="form-input bind-input" value="[% binds.item('weapon 8').join(' ').dquote | html %]"/>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="scroll-page" id="basic_page">
+
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h2>Basic</h2>
+                            </div>
+                        </div>
+
+                        <div class="row align-items-center">
+                            <div class="col">
+                            </div>
+                        </div>
+
+                        <!--div class="row row-bg align-items-center">
+                            <div class="col">Player Model</div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Master Volume" name="" class="form-input cvar-input" value="[% binds.item('weapon 1').item('keys').join(' ').dquote | html %]"/>
+                            </div>
+                        </div-->
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                <label for="sensitivity">Master Volume</label>
+                            </div>
+                            <div class="col">
+                                <div class="col d-flex align-items-center">
+                                    <input type="range"  id="s_volume"  name="s_volume" min="0" max="1" step="0.1" value="[% config.s_volume | html %]" class="cvar-input"
+                                                                                                                         oninput="document.getElementById('_s_volume').value=this.value" />
+                                    <input type="number" id="_s_volume" name="s_volume" min="0" max="1" step="0.1" value="[% config.s_volume | html %]" class="cvar-input"
+                                                                                                                         oninput="document.getElementById('s_volume').value=this.value" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                <label for="sensitivity">Music Volume</label>
+                            </div>
+                            <div class="col">
+                                <div class="col d-flex align-items-center">
+                                    <input type="range"  id="s_musicvolume"  name="s_musicvolume" min="0" max="1" step="0.1" value="[% config.s_musicvolume | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('_s_musicvolume').value=this.value" />
+                                    <input type="number" id="_s_musicvolume" name="s_musicvolume" min="0" max="1" step="0.1" value="[% config.s_musicvolume | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('s_musicvolume').value=this.value" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Player Model</div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Player Model" name="model" class="form-input cvar-input" value="[% config.item('model') | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Draw Crosshair</div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Draw Crosshair" name="cg_drawCrosshair" class="form-input cvar-input" value="[% config.cg_drawCrosshair | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Auto Switch</div>
+                            <div class="col">
+                                <select title="Autoswitch" name="cg_autoswitch" class="form-input cvar-input" value="[% config.item('cg_autoswitch') | html %]">
+                                    <option value="1" [%     config.item('cg_autoswitch') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_autoswitch') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Draw 2D</div>
+                            <div class="col">
+                                <select title="Draw 2D" name="cg_draw2D" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_draw2D') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_draw2D') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Draw 3D Icons</div>
+                            <div class="col">
+                                <select title="Draw 3D Icons" name="cg_draw3DIcons" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_draw3DIcons') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_draw3DIcons') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Draw Ammo Warning</div>
+                            <div class="col">
+                                <select title="Draw Ammo Warning" name="cg_drawAmmoWarning" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_drawAmmoWarning') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_drawAmmoWarning') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Draw Attacker</div>
+                            <div class="col">
+                                <select title="Draw Attacker" name="cg_drawAttacker" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_drawAttacker') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_drawAttacker') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Draw Crosshair Names</div>
+                            <div class="col">
+                                <select title="Draw Crosshair Names" name="cg_drawCrosshairNames" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_drawCrosshairNames') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_drawCrosshairNames') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Draw FPS</div>
+                            <div class="col">
+                                <select title="Draw FPS" name="cg_drawFPS" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_drawFPS') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_drawFPS') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Draw Friend</div>
+                            <div class="col">
+                                <select title="Draw Friend" name="cg_drawFriend" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_drawFriend') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_drawFriend') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Draw Gun</div>
+                            <div class="col">
+                                <select title="Draw Gun" name="cg_drawGun" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_drawGun') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_drawGun') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Draw Icons</div>
+                            <div class="col">
+                                <select title="Draw Icons" name="cg_drawIcons" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_drawIcons') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_drawIcons') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Draw Ping ( TODO )</div>
+                            <div class="col">
+                                <select title="Draw Ping" name="cg_drawPing" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_drawPing') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_drawPing') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Draw Rewards</div>
+                            <div class="col">
+                                <select title="Draw Rewards" name="cg_drawRewards" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_drawRewards') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_drawRewards') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Draw Snapshot</div>
+                            <div class="col">
+                                <select title="Draw Snapshot" name="cg_drawSnapshot" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_drawSnapshot') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_drawSnapshot') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Draw Team Overlay</div>
+                            <div class="col">
+                                <select title="Draw Team Overlay" name="cg_drawTeamOverlay" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_drawTeamOverlay') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_drawTeamOverlay') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Draw Timer</div>
+                            <div class="col">
+                                <select title="Draw Timer" name="cg_drawTimer" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_drawTimer') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_drawTimer') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Enemy Color ( TODO )</div>
+                            <div class="col">
+                                <input type="color" readonly="readonly" title="AnyColor" name="cg_enemyColorTODO" class="form-input cvar-input" value="[% config.item('cg_enemyColorTODO') | html %]"/>
+                            </div>
+                        </div>
+
+                         <div class="row row-bg align-items-center">
+                            <div class="col">Enemy Model TODO</div>
+                            <div class="col">
+                                <select title="Enemy Model" name="cg_enemyModel" class="form-input cvar-input" value="[% config.item('cg_enemyModel') | html %]">
+                                    <option style="background-image:url(/approot//models/players/sarge/icon_default.png)" value="sarge">Sarge</option>
+                                    <option value=""></option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Force Model</div>
+                            <div class="col">
+                                <select title="Force Model" name="cg_forceModel" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_forceModel') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_forceModel') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Force Colors</div>
+                            <div class="col">
+                                <select title="Force Colors" name="cg_forceColors" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_forceColors') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_forceColors') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Force Colors</div>
+                            <div class="col">
+                                <select title="Force Colors" name="cg_forceColors" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_forceColors') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_forceColors') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                <label for="sensitivity">Field Of View</label>
+                            </div>
+                            <div class="col">
+                                <div class="col d-flex align-items-center">
+                                    <input type="range"  id="cg_fov"  name="cg_fov" min="0" max="180" step="1" value="[% config.cg_fov | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('_cg_fov').value=this.value" />
+                                    <input type="number" id="_cg_fov" name="cg_fov" min="0" max="180" step="1" value="[% config.cg_fov | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('cg_fov').value=this.value" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Draw Gibs</div>
+                            <div class="col">
+                                <select title="Draw Gibs" name="cg_gibs" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_gibs') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_gibs') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Draw Lagometer</div>
+                            <div class="col">
+                                <select title="Draw Lagometer" name="cg_lagometer" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_lagometer') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_lagometer') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Draw Marks</div>
+                            <div class="col">
+                                <select title="Draw Marks" name="cg_marks" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_marks') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_marks') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Draw Muzzle Flash</div>
+                            <div class="col">
+                                <select title="Draw Muzzle Flash" name="cg_muzzleFlash" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_muzzleFlash') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_muzzleFlash') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Draw Projectile Trail</div>
+                            <div class="col">
+                                <select title="Draw Projectile Trail" name="cg_noProjectileTrail" class="form-input cvar-input" >
+                                    <option value="0" [%     config.item('cg_noProjectileTrail') and "selected" %]>Yes</option>
+                                    <option value="1" [% not config.item('cg_noProjectileTrail') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Draw Old Rail</div>
+                            <div class="col">
+                                <select title="Draw Old Rail" name="cg_oldRail" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_oldRail') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_oldRail') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg-alt align-items-center">
+                            <div class="col">Draw Old Rocket</div>
+                            <div class="col">
+                                <select title="Draw Old Rocket" name="cg_oldRocket" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_oldRocket') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_oldRocket') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Draw Score Plums</div>
+                            <div class="col">
+                                <select title="Draw Score Plums" name="cg_scorePlums" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_scorePlums') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_scorePlums') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Draw Simple Items</div>
+                            <div class="col">
+                                <select title="Draw Simple Items" name="cg_simpleItems" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_simpleItems') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_simpleItems') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                <label for="cl_pitchspeed">Mouse Pitch Speed</label>
+                            </div>
+                            <div class="col">
+                                <div class="col d-flex align-items-center">
+                                    <input type="range"  id="cl_pitchspeed"  name="cl_pitchspeed" min="0" max="280" step="1" value="[% config.cl_pitchspeed | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('_cl_pitchspeed').value=this.value" />
+                                    <input type="number" id="_cl_pitchspeed" name="cl_pitchspeed" min="0" max="280" step="1" value="[% config.cl_pitchspeed | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('cl_pitchspeed').value=this.value" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                <label for="cl_yawspeed">Mouse Yaw Speed</label>
+                            </div>
+                            <div class="col">
+                                <div class="col d-flex align-items-center">
+                                    <input type="range"  id="cl_yawspeed"  name="cl_yawspeed" min="0" max="280" step="1" value="[% config.cl_yawspeed | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('_cl_yawspeed').value=this.value" />
+                                    <input type="number" id="_cl_yawspeed" name="cl_yawspeed" min="0" max="280" step="1" value="[% config.cl_yawspeed | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('cl_yawspeed').value=this.value" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--div class="row align-items-center">
+                            <div class="col">
+                                <label for="cl_pitchspeed">Mouse Pitch Speed</label>
+                            </div>
+                            <div class="col">
+                                <div class="col d-flex align-items-center">
+                                    <input type="range"  id="cl_pitchspeed" name="cl_pitchspeed" min="0" max="280" step="1" value="[% config.cl_pitchspeed | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('_cl_pitchspeed').value=this.value" />
+                                    <input type="number" id="_cl_pitchspeed"                   min="0" max="280" step="1" value="[% config.cl_pitchspeed | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('cl_pitchspeed').value=this.value" />
+                                </div>
+                            </div>
+                        </div-->
+
+                       <div class="row row-bg align-items-center">
+                            <div class="col">Mouse Filter</div>
+                            <div class="col">
+                                <select title="Mouse Filter" name="m_filter" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('m_filter') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('m_filter') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        [% cvar = 'm_pitch' %]
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                <label for="[% cvar %]">Mouse Pitch</label>
+                            </div>
+                            <div class="col">
+                                <div class="col d-flex align-items-center">
+                                    <input type="range"  id="[% cvar %]"  name="[% cvar %]" min="0" max="1" step=".01" value="[% config.$cvar | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('_[% cvar %]').value=this.value" />
+                                    <input type="number" id="_[% cvar %]" name="[% cvar %]" min="0" max="1" step=".01" value="[% config.$cvar | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('[% cvar %]').value=this.value" />
+                                </div>
+                            </div>
+                        </div>
+
+                        [% cvar = 'm_side' %]
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                <label for="[% cvar %]">Mouse Side</label>
+                            </div>
+                            <div class="col">
+                                <div class="col d-flex align-items-center">
+                                    <input type="range"  id="[% cvar %]"  name="[% cvar %]" min="0" max="280" step="1" value="[% config.$cvar | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('_[% cvar %]').value=this.value" />
+                                    <input type="number" id="_[% cvar %]" name="[% cvar %]" min="0" max="280" step="1" value="[% config.$cvar | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('[% cvar %]').value=this.value" />
+                                </div>
+                            </div>
+                        </div>
+
+                        [% cvar = 'm_yaw' %]
+                        <div class="row row-bg align-items-center">
+                            <div class="col">
+                                <label for="[% cvar %]">Mouse Yaw</label>
+                            </div>
+                            <div class="col">
+                                <div class="col d-flex align-items-center">
+                                    <input type="range"  id="[% cvar %]"  name="[% cvar %]" min="0" max="280" step="1" value="[% config.$cvar | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('_[% cvar %]').value=this.value" />
+                                    <input type="number" id="_[% cvar %]" name="[% cvar %]" min="0" max="280" step="1" value="[% config.$cvar | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('[% cvar %]').value=this.value" />
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+                        <!--
+
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Any number</div>
+                            <div class="col">
+                                <input type="number" readonly="readonly" title="AnyNumber" name="" class="form-input cvar-input" value="[% config.item('') | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Any color</div>
+                            <div class="col">
+                                <input type="color" readonly="readonly" title="AnyColor" name="cg_" class="form-input cvar-input" value="[% config.item('cg_') | html %]"/>
+                            </div>
+                        </div>
+
+
+
+                        [% # first make sure the code uses the cvar before adding ... %]
+                        [% # first make sure the code uses the cvar before adding ... %]
+                        [% # first make sure the code uses the cvar before adding ... %]
+
+                        [% # list range value bool color ... %]
+
+
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Normal value</div>
+                            <div class="col">
+                                <input type="text" readonly="readonly" title="Master Volume" name="" class="form-input cvar-input" value="[% config.item('') | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Drop down Yes/No</div>
+                            <div class="col">
+                                <select title="DropDown" name="" class="form-input cvar-input" value="[% config.item('cg_') | html %]">
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Dropdown yes/no </div>
+                            <div class="col">
+                                <select title="Autoswitch" name="cg_" class="form-input cvar-input" >
+                                    <option value="1" [%     config.item('cg_') and "selected" %]>Yes</option>
+                                    <option value="0" [% not config.item('cg_') and "selected" %]>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+
+
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">Any number</div>
+                            <div class="col">
+                                <input type="number" readonly="readonly" title="AnyNumber" name="" class="form-input cvar-input" value="[% config.item('') | html %]"/>
+                            </div>
+                        </div>
+
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <label for="sensitivity">Range</label>
+                            </div>
+                            <div class="col">
+                                <div class="col d-flex align-items-center">
+                                    <input type="range"  id="s_musicvolume" name="s_musicvolume" min="0" max="1" step="0.1" value="[% config.s_musicvolume | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('_s_musicvolume').value=this.value" />
+                                    <input type="number" id="_s_musicvolume" min="0" max="1" step="0.1"                   value="[% config.s_musicvolume | html %]" class="form-input cvar-input"
+                                                                                                                         oninput="document.getElementById('s_musicvolume').value=this.value" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row row-bg align-items-center">
+                            <div class="col">List</div>
+                            <div class="col">
+                                <select title="DropDown" name="" class="form-input cvar-input" value="[% config.item('cg_') | html %]">
+                                    <option value=""></option>
+                                    <option value=""></option>
+                                </select>
+                            </div>
+                        </div>
+
+                        -->
+
+
+
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    <!--div onclick="this.style.display = 'none';" style="color:black">
+        [% # USE Dumper %] [% # Dumper.dump_html(binds) %][% # Dumper.dump_html(config) %] [% # Dumper.dump_html(keys) %] [% # Dumper.dump_html(keysJson) %]
+    </div-->
+
+
+        <!--footer></footer-->
+    </div>

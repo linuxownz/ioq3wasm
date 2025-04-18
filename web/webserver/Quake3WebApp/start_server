@@ -1,0 +1,1 @@
+reset; pkill lighttpd ; sudo lighttpd -D -f conf/lighttpd.conf

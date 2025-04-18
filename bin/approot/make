@@ -1,0 +1,3 @@
+#!/bin/bash
+
+gcc -gdwarf -Wall ./src/gen_filelist_from_map.c -o gen_filelist_from_map

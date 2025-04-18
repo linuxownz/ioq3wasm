@@ -1,0 +1,303 @@
+@import url("info.css");
+
+body {
+    scroll-behavior: thin;
+    font-family: arial;
+    margin: 0;
+    padding: none;
+}
+
+canvas {
+    animation-duration: 2.4s;
+    border: 0px none;
+    background-color: black;
+    width:  100%;
+    height: 100%
+}
+
+.emscripten_canvas_container {
+    border: 0px none;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    visibility:hidden;
+    z-index: 100;
+}
+
+.emscripten_canvas {
+    border: 0px none;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.html_overlay {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    visibility:hidden;
+    display: none;
+    z-index: 102;
+    backdrop-filter: blur(5.1px);
+    font-size: calc(1.2vw + 1.2vmin );
+    text-shadow:5px 5px 3px #000000
+}
+
+#menu {
+    position:relative;
+    margin-left:auto;
+    margin-top: auto;
+    margin-right: auto;
+    top: 5%;
+    width: 90%;
+    text-align:center;
+}
+
+#escape_menu {
+    border-radius: 10% / 60%;
+    position:relative;
+    visibility:hidden;
+    display:none;
+    xbackdrop-filter: blur(15.1px);
+    background-color: #860202;
+    opacity: .8;
+    z-index: 200;
+    font-size: calc(2.2vw + 1.2vmin );
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#nonteam {
+    visibility:hidden;
+    display:none;
+    width: 60%
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#nonteam table:first-child {
+    width: 50%;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+#nonteam table tr td:first-child {
+    width: 4%;
+}
+
+#nonteam table:nth-child(2) {
+    width: 40%;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+#team {
+    visibility:hidden;
+    display:none;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#team table:first-child {
+    width: 100%;
+}
+
+#team table:nth-child(2) {
+    width: 60%;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+#team table tr td:nth-child(6) {
+    backdrop-filter: blur(5.1px);
+    width: 40px;
+}
+
+#red_score {
+    font-size: 96px;
+    color: red;
+}
+
+#blue_score {
+    font-size: 96px;
+    color: blue;
+}
+
+.followHilight {
+    background-color: grey;
+}
+
+.emscripten_output {
+    animation-duration: 0.4s;
+    background-color: black;
+    border: 0px none;
+    color: rgb(128 128 128);
+    font-family: "Noto Sans Mono", monospace;
+    height: 45%;
+    opacity: 75%;
+    position: relative;
+    scroll-behavior: smooth;
+    scrollbar-width:thin;
+    width: 100%;
+    z-index: 101;
+}
+
+.emscripten_input {
+    animation-duration: 0.4s;
+    background-color: black;
+    border: none;
+    bottom: 7px;
+    color: rgb(255 255 255);
+    font-family: "Noto Sans Mono", monospace;
+    opacity: 75%;
+    position: relative;
+    width: 100%;
+    z-index: 200;
+}
+
+@keyframes slidedown {
+    from {
+        visibility:hidden;
+        translate: 0 0;
+        scale: 100% 1;
+        height:0;
+        opacity : 0%
+    }
+
+    to {
+        visibility:visible;
+        translate: 0px 0px;
+        scale: 100% 1;
+        height:250px;
+        opacity : 80%
+    }
+}
+
+@keyframes slideup {
+    from {
+        visibility:visible;
+        translate: 0px 0px;
+        scale: 100% 1;
+        height:250px;
+        opacity : 80%
+    }
+
+    to {
+        visibility:hidden;
+        translate: 0 0;
+        scale: 100% 1;
+        height:0px;
+        opacity : 10%
+    }
+}
+
+@keyframes canvasfadein {
+    to {
+        visibility: hidden;
+        opacity: 100%;
+    }
+
+    from {
+        visibility:visible;
+        opacity: 0%;
+    }
+}
+
+.output {
+    visibility: hidden;
+    animation-duration: 1s;
+    animation-name: slidedown;
+    animation-iteration-count: 1;
+    animation-direction: alternate;
+}
+
+.input {
+    visibility: hidden;
+    animation-duration: 1s;
+    animation-name: slidedown;
+    animation-iteration-count: 1;
+    animation-direction: alternate;
+}
+
+.input:focus-visible {
+    border:none;
+}
+
+.servername {
+    font-size: 32pt;
+}
+
+.server img {
+    width: 50%;
+    padding: .4em;
+}
+
+.main_section {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    opacity: 75%;
+}
+
+.serverinfo {
+    margin: 3em;
+    display:inline-block;
+    width: 80%;
+}
+
+.screenshot {
+    vertical-align:top;
+    margin-left: auto;
+    margin-right:auto;
+}
+
+.screenshot img {
+    width: 50%;
+    opacity: 45%;
+}
+
+.centertext {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.serverinfoitem {
+    width: 100%;
+    display: block;
+    margin-left: 1.25em;
+    margin-right: auto;
+    font-size: x-large;
+    line-height: 2.0em;
+}
+
+.playbutton {
+    margin-left:2em;
+}
+
+#playbutton {
+    margin-top:auto;
+    padding: 1em;
+    border-radius: 32px;
+    border:none;
+    background:none;
+    background-color: rgba( 1, 1, 1, 0.8 );
+    backdrop-filter: blur(3px);
+    font-family: 'newtown';
+    font-size: 36pt;
+    color:red;
+}
+
+#progress_container {
+    visibility: hidden;
+    margin: 10%;
+    font-size: 250%;
+}
+
+.player span:not(:first-child) {
+    padding-left:1em;
+}
