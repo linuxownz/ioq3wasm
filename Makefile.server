@@ -332,12 +332,12 @@ $(BUILD_DIR)/$(DEBTARGET): $(DEBOBJS) $(ALLHEADERS)
 	@echo
 	@echo built debug $@
 
-$(BUILD_DIR)/%.c.o: %.c  %.h
+$(BUILD_DIR)/%.c.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) -c $(COMPILE_FLAGS) $< -o $@
 	@echo
 
-$(BUILD_DIR)/%.c.d.o: %.c %.h
+$(BUILD_DIR)/%.c.d.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) -c $(DEBUG_FLAGS) $< -o $@
 	@echo
