@@ -4,7 +4,18 @@ set -eu
 
 cd $(git rev-parse --show-toplevel)/code
 
+[ -e client_tags ] && rm client_tags
+[ -e server_tags ] && rm server_tags
+
+client_files=$(make -f ../Makefile.client listsourcefiles | sed -e 's/code\///g')
+server_files=$(make -f ../Makefile.server listsourcefiles | sed -e 's/code\///g')
+
 extra="--kinds-C=+p"
 
-ctags -R $extra botlib cgame client game qcommon renderercommon renderergl2 sdl server sys wsServer $EMSDK/upstream/emscripten/cache/sysroot/include/
+ctags -R $extra $client_files
+mv tags client_tags
+
+ctags -R $extra $server_files
+mv tags server_tags
+
 
