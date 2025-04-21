@@ -2,17 +2,19 @@
 
 set -eu
 
+cd $(git rev-parse --show-toplevel)/
+
+# client C files
+make -sf Makefile.client listsourcefiles | sed -e 's/code\//\n/g' > code/cscope_client.files
+
+# server C files
+make -sf Makefile.server listsourcefiles | sed -e 's/code\//\n/g' > code/cscope_server.files
+
 cd $(git rev-parse --show-toplevel)/code
 
 # remove previous dbs
 [ -e cscope_client.out ] && rm cscope_client.out
 [ -e cscope_server.out ] && rm cscope_server.out
-
-# client C files
-make -f ../Makefile.client listsourcefiles | sed -e 's/code\//\n/g' > cscope_client.files
-
-# server C files
-make -f ../Makefile.server listsourcefiles | sed -e 's/code\//\n/g' > cscope_server.files
 
 # build db
 cscope -q -b -c -i cscope_client.files

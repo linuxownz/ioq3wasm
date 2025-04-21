@@ -191,10 +191,10 @@ static cvarTable_t gameCvarTable[] = {
     { &pmove_fixed,           "pmove_fixed",        "1", CVAR_SYSTEMINFO, 0, qfalse, qfalse},
     { &pmove_msec,            "pmove_msec",         "8", CVAR_SYSTEMINFO, 0, qfalse, qfalse},
 
-    { &g_railJump, 			  "g_railJump",         "0", CVAR_ARCHIVE, 0, qtrue },
+    { &g_railJump, 			  "g_railJump",         "0", CVAR_ARCHIVE,    0, qtrue, qfalse},
 
     //{ &g_rankings, "g_rankings", "0", 0, 0, qfalse},
-    { &g_localTeamPref,       "g_localTeamPref",    "",  0, 0, qfalse, qfalse }
+    { &g_localTeamPref,       "g_localTeamPref",    "",  0,               0, qfalse, qfalse }
 
 };
 

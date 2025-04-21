@@ -30,9 +30,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * See MASM snapvector.asm for commentary
  */
 
-static unsigned char ssemask[16] __attribute__((aligned(16))) =
-{
-    "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00"
+static unsigned char ssemask[16] __attribute__((aligned(16))) = {
+    "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00"
+  //"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00"
 };
 
 void qsnapvectorsse(vec3_t vec)

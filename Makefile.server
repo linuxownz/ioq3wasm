@@ -110,6 +110,9 @@ Q3DEDSERVERFILES = \
 	$(CODE_DIR)/server/sv_snapshot.c \
 	$(CODE_DIR)/server/sv_world.c
 
+Q3DEDSERVERHEADERS = \
+	$(CODE_DIR)/server/server.h
+
 Q3DEDQCOMMONFILES = \
 	$(CODE_DIR)/qcommon/cmd_server.c \
 	$(CODE_DIR)/qcommon/cm_load_server.c \
@@ -132,6 +135,25 @@ Q3DEDQCOMMONFILES = \
 	$(CODE_DIR)/qcommon/q_shared.c \
 	$(CODE_DIR)/qcommon/snapvector.c \
 	$(CODE_DIR)/qcommon/unzip.c
+
+Q3DEDQCOMMONHEADERS = \
+	$(CODE_DIR)/qcommon/cm_local.h \
+	$(CODE_DIR)/qcommon/cm_patch.h \
+	$(CODE_DIR)/qcommon/cm_polylib.h \
+	$(CODE_DIR)/qcommon/cm_public.h \
+	$(CODE_DIR)/qcommon/defaults.h \
+	$(CODE_DIR)/qcommon/ioapi.h \
+	$(CODE_DIR)/qcommon/json.h \
+	$(CODE_DIR)/qcommon/menudef.h \
+	$(CODE_DIR)/qcommon/net_ws_server.h \
+	$(CODE_DIR)/qcommon/puff.h \
+	$(CODE_DIR)/qcommon/qasm-inline.h \
+	$(CODE_DIR)/qcommon/qcommon_server.h \
+	$(CODE_DIR)/qcommon/qfiles.h \
+	$(CODE_DIR)/qcommon/q_platform.h \
+	$(CODE_DIR)/qcommon/q_shared_server.h \
+	$(CODE_DIR)/qcommon/surfaceflags.h \
+	$(CODE_DIR)/qcommon/unzip.h
 
 Q3DEDBOTLIBFILES = \
 	$(CODE_DIR)/botlib/be_aas_bspq3.c \
@@ -163,8 +185,41 @@ Q3DEDBOTLIBFILES = \
 	$(CODE_DIR)/botlib/l_script.c \
 	$(CODE_DIR)/botlib/l_struct.c
 
-#$(CODE_DIR)/sys/con_log.c
-#$(CODE_DIR)/sys/con_tty.c
+Q3DEDBOTLIBHEADERS = \
+	$(CODE_DIR)/botlib/aasfile.h \
+	$(CODE_DIR)/botlib/be_aas_bsp.h \
+	$(CODE_DIR)/botlib/be_aas_cluster.h \
+	$(CODE_DIR)/botlib/be_aas_debug.h \
+	$(CODE_DIR)/botlib/be_aas_def.h \
+	$(CODE_DIR)/botlib/be_aas_entity.h \
+	$(CODE_DIR)/botlib/be_aas_file.h \
+	$(CODE_DIR)/botlib/be_aas_funcs.h \
+	$(CODE_DIR)/botlib/be_aas.h \
+	$(CODE_DIR)/botlib/be_aas_main.h \
+	$(CODE_DIR)/botlib/be_aas_move.h \
+	$(CODE_DIR)/botlib/be_aas_optimize.h \
+	$(CODE_DIR)/botlib/be_aas_reach.h \
+	$(CODE_DIR)/botlib/be_aas_routealt.h \
+	$(CODE_DIR)/botlib/be_aas_route.h \
+	$(CODE_DIR)/botlib/be_aas_sample.h \
+	$(CODE_DIR)/botlib/be_ai_char.h \
+	$(CODE_DIR)/botlib/be_ai_chat.h \
+	$(CODE_DIR)/botlib/be_ai_gen.h \
+	$(CODE_DIR)/botlib/be_ai_goal.h \
+	$(CODE_DIR)/botlib/be_ai_move.h \
+	$(CODE_DIR)/botlib/be_ai_weap.h \
+	$(CODE_DIR)/botlib/be_ai_weight.h \
+	$(CODE_DIR)/botlib/be_ea.h \
+	$(CODE_DIR)/botlib/be_interface.h \
+	$(CODE_DIR)/botlib/botlib.h \
+	$(CODE_DIR)/botlib/l_crc.h \
+	$(CODE_DIR)/botlib/l_libvar.h \
+	$(CODE_DIR)/botlib/l_log.h \
+	$(CODE_DIR)/botlib/l_memory.h \
+	$(CODE_DIR)/botlib/l_precomp.h \
+	$(CODE_DIR)/botlib/l_script.h \
+	$(CODE_DIR)/botlib/l_struct.h \
+	$(CODE_DIR)/botlib/l_utils.h
 
 Q3DEDSYSFILES= \
 	$(CODE_DIR)/sys/sys_main_server.c \
@@ -203,13 +258,34 @@ Q3DEDBASEGAMEFILES = \
 	$(CODE_DIR)/game/g_utils.c \
 	$(CODE_DIR)/game/g_weapon.c
 
+Q3DEDBASEGAMEHEADERS = \
+	$(CODE_DIR)/game/ai_chat.h \
+	$(CODE_DIR)/game/ai_cmd.h \
+	$(CODE_DIR)/game/ai_dmnet.h \
+	$(CODE_DIR)/game/ai_dmq3.h \
+	$(CODE_DIR)/game/ai_main.h \
+	$(CODE_DIR)/game/ai_team.h \
+	$(CODE_DIR)/game/ai_vcmd.h \
+	$(CODE_DIR)/game/bg_local.h \
+	$(CODE_DIR)/game/bg_public.h \
+	$(CODE_DIR)/game/chars.h \
+	$(CODE_DIR)/game/g_local.h \
+	$(CODE_DIR)/game/g_public.h \
+	$(CODE_DIR)/game/g_team.h \
+	$(CODE_DIR)/game/inv.h \
+	$(CODE_DIR)/game/match.h \
+	$(CODE_DIR)/game/syn.h
+
+
+
 Q3DEDSYSOBJS      := $(Q3DEDSYSFILES:%=$(BUILD_DIR)/%.o)
 Q3DEDBOTLIBOBJS   := $(Q3DEDBOTLIBFILES:%=$(BUILD_DIR)/%.o)
 Q3DEDSERVEROBJS   := $(Q3DEDSERVERFILES:%=$(BUILD_DIR)/%.o)
 Q3DEDQCOMMONOBJS  := $(Q3DEDQCOMMONFILES:%=$(BUILD_DIR)/%.o)
 Q3DEDBASEGAMEOBJS := $(Q3DEDBASEGAMEFILES:%=$(BUILD_DIR)/%.o)
 
-ALLOBJS := $(Q3DEDSYSOBJS) $(Q3DEDBOTLIBOBJS) $(Q3DEDSERVEROBJS) $(Q3DEDQCOMMONOBJS) $(Q3DEDBASEGAMEOBJS)
+ALLOBJS    := $(Q3DEDSYSOBJS) $(Q3DEDBOTLIBOBJS) $(Q3DEDSERVEROBJS) $(Q3DEDQCOMMONOBJS) $(Q3DEDBASEGAMEOBJS)
+ALLHEADERS := $(Q3DEDSERVERHEADERS) $(Q3DEDQCOMMONHEADERS) $(Q3DEDBOTLIBHEADERS) $(Q3DEDBASEGAMEHEADERS)
 
 DEBQ3DEDSYSOBJS      := $(Q3DEDSYSFILES:%=$(BUILD_DIR)/%.d.o)
 DEBQ3DEDBOTLIBOBJS   := $(Q3DEDBOTLIBFILES:%=$(BUILD_DIR)/%.d.o)
@@ -246,22 +322,22 @@ release: $(BUILD_DIR)/$(RELTARGET)
 debug: $(BUILD_DIR)/$(DEBTARGET)
 
 # release build
-$(BUILD_DIR)/$(RELTARGET): $(ALLOBJS)
+$(BUILD_DIR)/$(RELTARGET): $(ALLOBJS) $(ALLHEADERS)
 	$(CC) $(ALLOBJS) -o $@ $(LINKER_FLAGS)
 	@echo
 	@echo built release $@
 
-$(BUILD_DIR)/$(DEBTARGET): $(DEBOBJS)
+$(BUILD_DIR)/$(DEBTARGET): $(DEBOBJS) $(ALLHEADERS)
 	$(CC) $(DEBOBJS) -o $@ $(DEBUGLINKER_FLAGS)
 	@echo
 	@echo built debug $@
 
-$(BUILD_DIR)/%.c.o: %.c
+$(BUILD_DIR)/%.c.o: %.c  %.h
 	@mkdir -p $(dir $@)
 	$(CC) -c $(COMPILE_FLAGS) $< -o $@
 	@echo
 
-$(BUILD_DIR)/%.c.d.o: %.c
+$(BUILD_DIR)/%.c.d.o: %.c %.h
 	@mkdir -p $(dir $@)
 	$(CC) -c $(DEBUG_FLAGS) $< -o $@
 	@echo
@@ -275,6 +351,9 @@ docs:
 
 listsourcefiles:
 	@echo $(ALLSRCFILES)
+
+listheaderfiles:
+	@echo $(ALLHEADERS)
 
 # program has to be run after building
 coverage:

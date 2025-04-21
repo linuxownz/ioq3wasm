@@ -243,6 +243,10 @@ CGAMESRCFILES = \
  	$(CODE_DIR)/cgame/cg_view.c \
  	$(CODE_DIR)/cgame/cg_weapons.c
 
+CGAMEHEADERS = \
+ 	$(CODE_DIR)/cgame/cg_local.h \
+ 	$(CODE_DIR)/cgame/cg_public.h
+
 
 CLIENTSRCFILES = \
  	$(CODE_DIR)/client/cl_cgame.c \
@@ -264,10 +268,27 @@ CLIENTSRCFILES = \
  	$(CODE_DIR)/client/snd_openal.c \
  	$(CODE_DIR)/client/snd_wavelet.c
 
+CLIENTHEADERS = \
+ 	$(CODE_DIR)/client/bg_public.h  \
+ 	$(CODE_DIR)/client/client.h \
+ 	$(CODE_DIR)/client/keycodes.h \
+ 	$(CODE_DIR)/client/keys.h \
+ 	$(CODE_DIR)/client/qal.h \
+ 	$(CODE_DIR)/client/snd_codec.h \
+ 	$(CODE_DIR)/client/snd_local.h \
+ 	$(CODE_DIR)/client/snd_openal.h \
+ 	$(CODE_DIR)/client/snd_public.h \
+ 	$(CODE_DIR)/client/wav_header.h	
+
 GAMESRCFILES = \
  	$(CODE_DIR)/game/bg_misc.c \
  	$(CODE_DIR)/game/bg_pmove.c \
  	$(CODE_DIR)/game/bg_slidemove.c
+
+GAMEHEADERS = \
+ 	$(CODE_DIR)/qcommon/defaults.h \
+  	$(CODE_DIR)/game/bg_public.h \
+  	$(CODE_DIR)/game/bg_local.h
 
 QCOMMONSRCFILES = \
  	$(CODE_DIR)/qcommon/cmd_client.c \
@@ -288,12 +309,35 @@ QCOMMONSRCFILES = \
  	$(CODE_DIR)/qcommon/q_math.c \
  	$(CODE_DIR)/qcommon/q_shared.c
 
+QCOMMONHEADERS = \
+ 	$(CODE_DIR)/qcommon/cm_local.h \
+ 	$(CODE_DIR)/qcommon/cm_patch.h \
+ 	$(CODE_DIR)/qcommon/cm_polylib.h \
+ 	$(CODE_DIR)/qcommon/cm_public.h \
+ 	$(CODE_DIR)/qcommon/defaults.h \
+ 	$(CODE_DIR)/qcommon/ioapi.h \
+ 	$(CODE_DIR)/qcommon/net_ws_client.h \
+ 	$(CODE_DIR)/qcommon/puff.h \
+ 	$(CODE_DIR)/qcommon/qasm-inline.h \
+ 	$(CODE_DIR)/qcommon/qcommon_client.h \
+ 	$(CODE_DIR)/qcommon/qfiles.h \
+ 	$(CODE_DIR)/qcommon/q_platform.h \
+ 	$(CODE_DIR)/qcommon/q_shared_client.h \
+ 	$(CODE_DIR)/qcommon/surfaceflags.h
+
 RENDERCOMMONSRCFILES = \
  	$(CODE_DIR)/renderercommon/tr_image_bmp.c \
  	$(CODE_DIR)/renderercommon/tr_image_jpg.c \
  	$(CODE_DIR)/renderercommon/tr_image_png.c \
  	$(CODE_DIR)/renderercommon/tr_image_tga.c \
  	$(CODE_DIR)/renderercommon/tr_noise.c
+
+RENDERCOMMONHEADERS = \
+ 	$(CODE_DIR)/renderercommon/iqm.h \
+ 	$(CODE_DIR)/renderercommon/qgl.h \
+ 	$(CODE_DIR)/renderercommon/tr_common.h \
+ 	$(CODE_DIR)/renderercommon/tr_public.h \
+ 	$(CODE_DIR)/renderercommon/tr_types.h
 
 RENDERGL2SRCFILES = \
  	$(CODE_DIR)/renderergl2/tr_animation.c \
@@ -328,6 +372,14 @@ RENDERGL2SRCFILES = \
  	$(CODE_DIR)/renderergl2/tr_surface.c \
  	$(CODE_DIR)/renderergl2/tr_vbo.c \
  	$(CODE_DIR)/renderergl2/tr_world.c
+
+RENDERGL2HEADERS = \
+ 	$(CODE_DIR)/renderergl2/tr_dsa.h \
+ 	$(CODE_DIR)/renderergl2/tr_extramath.h \
+ 	$(CODE_DIR)/renderergl2/tr_extratypes.h \
+ 	$(CODE_DIR)/renderergl2/tr_fbo.h \
+ 	$(CODE_DIR)/renderergl2/tr_local.h \
+ 	$(CODE_DIR)/renderergl2/tr_postprocess.h
 
 SHADERSRCFILES = \
 	$(CODE_DIR)/renderergl2/glsl/bokeh_fp.glsl \
@@ -391,6 +443,7 @@ SYSOBJS          := $(SYSSRCFILES:%=$(BUILD_DIR)/%.o)
 ALLOBJS := $(CGAMEOBJS) $(CLIENTOBJS) $(GAMEOBJS) $(QCOMMONOBJS) $(RENDERCOMMONOBJS) $(RENDERGL2OBJS) $(CONOBJS) $(SYSOBJS)
 
 ALLSRCFILES := $(CGAMESRCFILES) $(CLIENTSRCFILES) $(GAMESRCFILES) $(QCOMMONSRCFILES) $(RENDERCOMMONSRCFILES) $(RENDERGL2SRCFILES) $(CONSRCFILES) $(SYSSRCFILES)
+ALLHEADERS  := $(CGAMEHEADERS) $(CLIENTHEADERS) $(GAMEHEADERS) $(QCOMMONHEADERS) $(RENDERCOMMONHEADERS) $(RENDERGL2HEADERS)
 
 ALLOBJS += $(SDLOBJS)
 ALLSRCFILES += $(SDLSRCFILES)
@@ -404,7 +457,7 @@ TARGET = quake3.html
 # strip MY NAME from builds
 # strip MY NAME from builds
 
-.PHONY: all clean
+.PHONY: all clean pre-build
 
 all: pre-build build
 
@@ -416,11 +469,11 @@ pre-build:
 
 build: $(BUILD_DIR)/$(TARGET)
 
-$(BUILD_DIR)/$(TARGET): $(ALLOBJS)
+$(BUILD_DIR)/$(TARGET): $(ALLOBJS) $(ALLHEADERS)
 	$(CC) $(ALLOBJS) -o $@ $(LINKER_FLAGS)
 	@echo
 
-$(BUILD_DIR)/%.c.o: %.c
+$(BUILD_DIR)/%.c.o: %.c %.h
 	@mkdir -p $(dir $@)
 	$(CC) -c $(COMPILE_FLAGS) $< -o $@
 	@echo
@@ -434,6 +487,9 @@ docs:
 
 listsourcefiles:
 	@echo $(ALLSRCFILES)
+
+listheaderfiles:
+	@echo $(ALLHEADERS)
 
 showcompileflags:
 	@echo $(COMPILE_FLAGS)

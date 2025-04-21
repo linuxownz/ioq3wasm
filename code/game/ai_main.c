@@ -1416,7 +1416,7 @@ int BotAIStartFrame(int time) {
     int i;
     gentity_t   *ent;
     bot_entitystate_t state;
-    int elapsed_time, thinktime;
+    int elapsed_time = 0, thinktime = 0;
     static int local_time;
     static int botlib_residual;
     static int lastbotthink_time;
