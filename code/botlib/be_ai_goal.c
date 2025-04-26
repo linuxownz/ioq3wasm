@@ -176,22 +176,27 @@ typedef struct bot_goalstate_s
     float avoidgoaltimes[MAX_AVOIDGOALS];       //times to avoid the goals
 } bot_goalstate_t;
 
-bot_goalstate_t *botgoalstates[MAX_CLIENTS + 1]; // FIXME: init?
+static bot_goalstate_t *botgoalstates[MAX_CLIENTS + 1]; // FIXME: init?
 //item configuration
-itemconfig_t *itemconfig = NULL;
+static itemconfig_t *itemconfig = NULL;
+
 //level items
-levelitem_t *levelitemheap = NULL;
-levelitem_t *freelevelitems = NULL;
-levelitem_t *levelitems = NULL;
-int numlevelitems = 0;
+static levelitem_t *levelitemheap = NULL;
+static levelitem_t *freelevelitems = NULL;
+static levelitem_t *levelitems = NULL;
+static int numlevelitems = 0;
+
 //map locations
-maplocation_t *maplocations = NULL;
+static maplocation_t *maplocations = NULL;
+
 //camp spots
-campspot_t *campspots = NULL;
+static campspot_t *campspots = NULL;
+
 //the game type
 static int g_gametype = 0;
+
 //additional dropped item weight
-libvar_t *droppedweight = NULL;
+static libvar_t *droppedweight = NULL;
 
 //========================================================================
 //
@@ -199,7 +204,7 @@ libvar_t *droppedweight = NULL;
 // Returns:                 -
 // Changes Globals:     -
 //========================================================================
-bot_goalstate_t *BotGoalStateFromHandle(int handle)
+static bot_goalstate_t *BotGoalStateFromHandle(int handle)
 {
     if (handle <= 0 || handle > MAX_CLIENTS)
     {
@@ -270,7 +275,7 @@ void BotMutateGoalFuzzyLogic(int goalstate, float range)
 // Returns:                 -
 // Changes Globals:     -
 //===========================================================================
-itemconfig_t *LoadItemConfig(char *filename)
+static itemconfig_t *LoadItemConfig(char *filename)
 {
     int max_iteminfo;
     token_t token;
@@ -351,7 +356,7 @@ itemconfig_t *LoadItemConfig(char *filename)
 // Returns:                 -
 // Changes Globals:     -
 //===========================================================================
-int *ItemWeightIndex(weightconfig_t *iwc, itemconfig_t *ic)
+static int *ItemWeightIndex(weightconfig_t *iwc, itemconfig_t *ic)
 {
     int *index, i;
 
@@ -374,7 +379,7 @@ int *ItemWeightIndex(weightconfig_t *iwc, itemconfig_t *ic)
 // Returns:                 -
 // Changes Globals:     -
 //===========================================================================
-void InitLevelItemHeap(void)
+static void InitLevelItemHeap(void)
 {
     int i, max_levelitems;
 
@@ -397,7 +402,7 @@ void InitLevelItemHeap(void)
 // Returns:                 -
 // Changes Globals:     -
 //===========================================================================
-levelitem_t *AllocLevelItem(void)
+static levelitem_t *AllocLevelItem(void)
 {
     levelitem_t *li;
 
@@ -418,7 +423,7 @@ levelitem_t *AllocLevelItem(void)
 // Returns:                 -
 // Changes Globals:     -
 //===========================================================================
-void FreeLevelItem(levelitem_t *li)
+static void FreeLevelItem(levelitem_t *li)
 {
     li->next = freelevelitems;
     freelevelitems = li;
@@ -429,7 +434,7 @@ void FreeLevelItem(levelitem_t *li)
 // Returns:                 -
 // Changes Globals:     -
 //===========================================================================
-void AddLevelItemToList(levelitem_t *li)
+static void AddLevelItemToList(levelitem_t *li)
 {
     if (levelitems) levelitems->prev = li;
     li->prev = NULL;
@@ -442,7 +447,7 @@ void AddLevelItemToList(levelitem_t *li)
 // Returns:                 -
 // Changes Globals:     -
 //===========================================================================
-void RemoveLevelItemFromList(levelitem_t *li)
+static void RemoveLevelItemFromList(levelitem_t *li)
 {
     if (li->prev) li->prev->next = li->next;
     else levelitems = li->next;
@@ -454,7 +459,7 @@ void RemoveLevelItemFromList(levelitem_t *li)
 // Returns:             -
 // Changes Globals:     -
 //===========================================================================
-void BotFreeInfoEntities(void)
+static void BotFreeInfoEntities(void)
 {
     maplocation_t *ml, *nextml;
     campspot_t *cs, *nextcs;
@@ -478,7 +483,7 @@ void BotFreeInfoEntities(void)
 // Returns:             -
 // Changes Globals:     -
 //===========================================================================
-void BotInitInfoEntities(void)
+static void BotInitInfoEntities(void)
 {
     char classname[MAX_EPAIRKEY];
     maplocation_t *ml;
@@ -743,7 +748,7 @@ void BotDumpAvoidGoals(int goalstate)
 // Returns:                 -
 // Changes Globals:     -
 //===========================================================================
-void BotAddToAvoidGoals(bot_goalstate_t *gs, int number, float avoidtime)
+static void BotAddToAvoidGoals(bot_goalstate_t *gs, int number, float avoidtime) // this is static but removefromavoidgoals is used elsewhere???? is this called?
 {
     int i;
 
@@ -973,7 +978,9 @@ int BotGetNextCampSpotGoal(int num, bot_goal_t *goal)
 // Returns:             -
 // Changes Globals:     -
 //===========================================================================
-void BotFindEntityForLevelItem(levelitem_t *li)
+#if 0
+// NOT USED
+static void BotFindEntityForLevelItem(levelitem_t *li)
 {
     int ent, modelindex;
     itemconfig_t *ic;
@@ -1007,6 +1014,7 @@ void BotFindEntityForLevelItem(levelitem_t *li)
         } //end if
     } //end for
 } //end of the function BotFindEntityForLevelItem
+#endif
 //===========================================================================
 //
 // Parameter:           -

@@ -73,7 +73,7 @@ int numbots;
 //floating point time
 float floattime;
 //time to do a regular update
-float regularupdate_time;
+static float regularupdate_time = 0.0f;
 //
 int bot_interbreed;
 int bot_interbreedmatchcount;
@@ -955,6 +955,8 @@ static void BotAIRegularUpdate(void) {
     if (regularupdate_time < FloatTime()) {
         BotUpdateEntityItems();
         regularupdate_time = FloatTime() + 0.3;
+    } else {
+        regularupdate_time = FloatTime();
     }
 }
 
@@ -1421,6 +1423,10 @@ int BotAIStartFrame(int time) {
     static int botlib_residual;
     static int lastbotthink_time;
 
+    if ( time == 0 ) {
+        local_time = lastbotthink_time = botlib_residual = 0;
+    }
+
     G_CheckBotSpawn();
 
     Cvar_Update(&bot_rocketjump);
@@ -1607,6 +1613,8 @@ BotInitLibrary
 */
 static int BotInitLibrary(void) {
     char buf[144];
+
+    regularupdate_time = 0.0f;
 
     //set the maxclients and maxentities library variables before calling BotSetupLibrary
     Com_sprintf(buf, sizeof(buf), "%d", level.maxclients);
