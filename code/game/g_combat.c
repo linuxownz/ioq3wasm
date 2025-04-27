@@ -55,6 +55,10 @@ void DamagePlum( gentity_t *ent, gentity_t *target, int mod, int damage ) {
     gentity_t *plum;
     vec3_t origin;
 
+    if ( g_damagePlums.integer == 0 ) {
+        return;
+    }
+
     if (!ent->client || !ent->client->pers.damagePlums) {
         return;
     }

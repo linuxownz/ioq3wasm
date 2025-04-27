@@ -2284,7 +2284,7 @@ int BotExpandChatMessage(char *outmessage, char *message, unsigned long mcontext
 {
     int num, len, i, expansion;
     char *outputbuf, *ptr, *msgptr;
-    char temp[MAX_MESSAGE_SIZE];
+    char temp[MAX_MESSAGE_SIZE] = { 0 };
 
     expansion = qfalse;
     msgptr = message;

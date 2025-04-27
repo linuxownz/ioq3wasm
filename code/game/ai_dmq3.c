@@ -4634,7 +4634,7 @@ BotCheckConsoleMessages
 ==================
 */
 static void BotCheckConsoleMessages(bot_state_t *bs) {
-    char botname[MAX_NETNAME], message[MAX_MESSAGE_SIZE], netname[MAX_NETNAME], *ptr;
+    char botname[MAX_NETNAME], message[MAX_MESSAGE_SIZE] = { 0 }, netname[MAX_NETNAME], *ptr;
     float chat_reply;
     int context, handle;
     bot_consolemessage_t m;

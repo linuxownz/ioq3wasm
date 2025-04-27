@@ -1806,7 +1806,7 @@ int AINode_Seek_LTG(bot_state_t *bs)
 {
     bot_goal_t goal;
     vec3_t target, dir;
-    bot_moveresult_t moveresult;
+    bot_moveresult_t moveresult = { 0 };
     int range;
     //char buf[128];
     //bot_goal_t tmpgoal;
@@ -2307,7 +2307,7 @@ AINode_Battle_Retreat
 int AINode_Battle_Retreat(bot_state_t *bs) {
     bot_goal_t goal;
     aas_entityinfo_t entinfo;
-    bot_moveresult_t moveresult;
+    bot_moveresult_t moveresult = { 0 };
     vec3_t target, dir;
     float attack_skill, range;
     int areanum;
