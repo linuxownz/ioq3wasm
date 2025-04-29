@@ -67,7 +67,7 @@ int  SV_BotLibShutdown( void );
 // extern botlib_export_t * botlib_export;
 
 //bot states
-static bot_state_t *botstates[MAX_CLIENTS];
+static bot_state_t botstates[MAX_CLIENTS];
 //number of bots
 int numbots;
 //floating point time
@@ -557,14 +557,14 @@ static void BotUpdateInfoConfigStrings(void) {
 
     for (i = 0; i < level.maxclients; i++) {
         //
-        if ( !botstates[i] || !botstates[i]->inuse )
+        if ( /*!botstates[i] || */!botstates[i].inuse )
             continue;
         //
         SV_GetConfigstring(CS_PLAYERS+i, buf, sizeof(buf));
         //if no config string or no name
         if (!strlen(buf) || !strlen(Info_ValueForKey(buf, "n")))
             continue;
-        BotSetInfoConfigString(botstates[i]);
+        BotSetInfoConfigString(&botstates[i]);
     }
 }
 
@@ -580,8 +580,8 @@ static void BotInterbreedBots(void) {
 
     // get rankings for all the bots
     for (i = 0; i < MAX_CLIENTS; i++) {
-        if ( botstates[i] && botstates[i]->inuse ) {
-            ranks[i] = botstates[i]->num_kills * 2 - botstates[i]->num_deaths;
+        if ( /*botstates[i] && */botstates[i].inuse ) {
+            ranks[i] = botstates[i].num_kills * 2 - botstates[i].num_deaths;
         }
         else {
             ranks[i] = -1;
@@ -589,14 +589,14 @@ static void BotInterbreedBots(void) {
     }
 
     if (GeneticParentsAndChildSelection(MAX_CLIENTS, ranks, &parent1, &parent2, &child)) {
-        BotInterbreedGoalFuzzyLogic(botstates[parent1]->gs, botstates[parent2]->gs, botstates[child]->gs);
-        BotMutateGoalFuzzyLogic(botstates[child]->gs, 1);
+        BotInterbreedGoalFuzzyLogic(botstates[parent1].gs, botstates[parent2].gs, botstates[child].gs);
+        BotMutateGoalFuzzyLogic(botstates[child].gs, 1);
     }
     // reset the kills and deaths
     for (i = 0; i < MAX_CLIENTS; i++) {
-        if (botstates[i] && botstates[i]->inuse) {
-            botstates[i]->num_kills = 0;
-            botstates[i]->num_deaths = 0;
+        if (/*botstates[i] && */botstates[i].inuse) {
+            botstates[i].num_kills  = 0;
+            botstates[i].num_deaths = 0;
         }
     }
 }
@@ -614,8 +614,8 @@ static void BotWriteInterbreeded(char *filename) {
     bestbot = -1;
     // get the best bot
     for (i = 0; i < MAX_CLIENTS; i++) {
-        if ( botstates[i] && botstates[i]->inuse ) {
-            rank = botstates[i]->num_kills * 2 - botstates[i]->num_deaths;
+        if ( /*botstates[i] &&*/ botstates[i].inuse ) {
+            rank = botstates[i].num_kills * 2 - botstates[i].num_deaths;
         }
         else {
             rank = -1;
@@ -627,7 +627,7 @@ static void BotWriteInterbreeded(char *filename) {
     }
     if (bestbot >= 0) {
         //write out the new goal fuzzy logic
-        BotSaveGoalFuzzyLogic(botstates[bestbot]->gs, filename);
+        BotSaveGoalFuzzyLogic(botstates[bestbot].gs, filename);
     }
 }
 
@@ -672,8 +672,8 @@ static void BotInterbreeding(void) {
     }
     //shutdown all the bots
     for (i = 0; i < MAX_CLIENTS; i++) {
-        if (botstates[i] && botstates[i]->inuse) {
-            BotAIShutdownClient(botstates[i]->client, qfalse);
+        if (/*botstates[i] && */botstates[i].inuse) {
+            BotAIShutdownClient(botstates[i].client, qfalse);
         }
     }
     //make sure all item weight configs are reloaded and Not shared
@@ -715,7 +715,7 @@ int BotTeamLeader(bot_state_t *bs) {
 
     leader = ClientFromName(bs->teamleader);
     if (leader < 0) return qfalse;
-    if (!botstates[leader] || !botstates[leader]->inuse) return qfalse;
+    if (/*!botstates[leader] || */!botstates[leader].inuse) return qfalse;
     return qtrue;
 }
 
@@ -993,7 +993,7 @@ static int BotAI(int client, float thinktime) {
 
     EA_ResetInput(client);
     //
-    bs = botstates[client];
+    bs = &botstates[client];
     if (!bs || !bs->inuse) {
         BotAI_Print(PRT_FATAL, "BotAI: client %d is not setup\n", client);
         return qfalse;
@@ -1091,11 +1091,11 @@ static void BotScheduleBotThink(void) {
     botnum = 0;
 
     for( i = 0; i < MAX_CLIENTS; i++ ) {
-        if( !botstates[i] || !botstates[i]->inuse ) {
+        if( /*!botstates[i] || */!botstates[i].inuse ) {
             continue;
         }
         //initialize the bot think residual time
-        botstates[i]->botthink_residual = bot_thinktime.integer * botnum / numbots;
+        botstates[i].botthink_residual = bot_thinktime.integer * botnum / numbots;
         botnum++;
     }
 }
@@ -1189,8 +1189,12 @@ int BotAISetupClient(int client, struct bot_settings_s *settings, qboolean resta
     bot_state_t *bs;
     int errnum;
 
-    if (!botstates[client]) botstates[client] = G_Alloc(sizeof(bot_state_t));
-    bs = botstates[client];
+    if (!botstates[client].inuse) {
+        //botstates[client] = G_Alloc(sizeof(bot_state_t));
+        memset(&botstates[client], 0, sizeof(botstates[0]));
+    }
+
+    bs = &botstates[client];
 
     if (!bs) {
         return qfalse;
@@ -1287,7 +1291,7 @@ BotAIShutdownClient
 int BotAIShutdownClient(int client, qboolean restart) {
     bot_state_t *bs;
 
-    bs = botstates[client];
+    bs = &botstates[client];
     if (!bs || !bs->inuse) {
         // BotAISetupClient failed
         BotAI_Print(PRT_ERROR, "BotAIShutdownClient: client %d already shutdown\n", client);
@@ -1394,9 +1398,9 @@ int BotAILoadMap( int restart ) {
     }
 
     for (i = 0; i < MAX_CLIENTS; i++) {
-        if (botstates[i] && botstates[i]->inuse) {
-            BotResetState( botstates[i] );
-            botstates[i]->setupcount = 4;
+        if (/*botstates[i] && */botstates[i].inuse) {
+            BotResetState( &botstates[i] );
+            botstates[i].setupcount = 4;
         }
     }
 
@@ -1449,18 +1453,18 @@ int BotAIStartFrame(int time) {
     if (bot_pause.integer) {
         // execute bot user commands every frame
         for( i = 0; i < MAX_CLIENTS; i++ ) {
-            if( !botstates[i] || !botstates[i]->inuse ) {
+            if( /*!botstates[i] || */!botstates[i].inuse ) {
                 continue;
             }
             if( g_entities[i].client->pers.connected != CON_CONNECTED ) {
                 continue;
             }
-            botstates[i]->lastucmd.forwardmove = 0;
-            botstates[i]->lastucmd.rightmove = 0;
-            botstates[i]->lastucmd.upmove = 0;
-            botstates[i]->lastucmd.buttons = 0;
-            botstates[i]->lastucmd.serverTime = time;
-            SV_BotUserCommand(botstates[i]->client, &botstates[i]->lastucmd); // TODO check for correctness
+            botstates[i].lastucmd.forwardmove = 0;
+            botstates[i].lastucmd.rightmove = 0;
+            botstates[i].lastucmd.upmove = 0;
+            botstates[i].lastucmd.buttons = 0;
+            botstates[i].lastucmd.serverTime = time;
+            SV_BotUserCommand(botstates[i].client, &botstates[i].lastucmd); // TODO check for correctness
         }
         return qtrue;
     }
@@ -1572,14 +1576,14 @@ int BotAIStartFrame(int time) {
 
     // execute scheduled bot AI
     for( i = 0; i < MAX_CLIENTS; i++ ) {
-        if( !botstates[i] || !botstates[i]->inuse ) {
+        if( /*!botstates[i] || */!botstates[i].inuse ) {
             continue;
         }
         //
-        botstates[i]->botthink_residual += elapsed_time;
+        botstates[i].botthink_residual += elapsed_time;
         //
-        if ( botstates[i]->botthink_residual >= thinktime ) {
-            botstates[i]->botthink_residual -= thinktime;
+        if ( botstates[i].botthink_residual >= thinktime ) {
+            botstates[i].botthink_residual -= thinktime;
 
             if (!AAS_Initialized()) return qfalse;
 
@@ -1592,15 +1596,15 @@ int BotAIStartFrame(int time) {
 
     // execute bot user commands every frame
     for( i = 0; i < MAX_CLIENTS; i++ ) {
-        if( !botstates[i] || !botstates[i]->inuse ) {
+        if( /*!botstates[i] || */!botstates[i].inuse ) {
             continue;
         }
         if( g_entities[i].client->pers.connected != CON_CONNECTED ) {
             continue;
         }
 
-        BotUpdateInput(botstates[i], time, elapsed_time);
-        SV_BotUserCommand(botstates[i]->client, &botstates[i]->lastucmd); // TODO
+        BotUpdateInput(&botstates[i], time, elapsed_time);
+        SV_BotUserCommand(botstates[i].client, &botstates[i].lastucmd); // TODO
     }
 
     return qtrue;
@@ -1746,8 +1750,8 @@ int BotAIShutdown( int restart ) {
     if ( restart ) {
         //shutdown all the bots in the botlib
         for (i = 0; i < MAX_CLIENTS; i++) {
-            if (botstates[i] && botstates[i]->inuse) {
-                BotAIShutdownClient(botstates[i]->client, restart);
+            if (/*botstates[i] && */botstates[i].inuse) {
+                BotAIShutdownClient(botstates[i].client, restart);
             }
         }
         //don't shutdown the bot library

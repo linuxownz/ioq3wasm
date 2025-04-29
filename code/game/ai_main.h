@@ -121,7 +121,8 @@ typedef struct bot_activategoal_s
 //bot state
 typedef struct bot_state_s
 {
-    char FENCEBEGIN[4096];
+    char canary;
+    //char FENCEBEGIN[16128];
     int inuse;                                      //true if this state is used by a bot client
     int botthink_residual;                          //residual for the bot thinks
     int client;                                     //client number of the bot
@@ -272,7 +273,7 @@ typedef struct bot_state_s
     bot_waypoint_t *patrolpoints;                   //patrol points
     bot_waypoint_t *curpatrolpoint;                 //current patrol point the bot is going for
     int patrolflags;                                //patrol flags
-    char FENCEEND[4096];
+    //char FENCEEND[4096];
 } bot_state_t;
 
 //resets the whole bot state
