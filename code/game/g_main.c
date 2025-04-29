@@ -83,6 +83,7 @@ vmCvar_t g_smoothClients;
 vmCvar_t pmove_fixed;
 vmCvar_t pmove_msec;
 vmCvar_t g_railJump;
+vmCvar_t g_instagib;
 //vmCvar_t    g_rankings;
 vmCvar_t g_listEntity;
 vmCvar_t g_localTeamPref;
@@ -192,6 +193,7 @@ static cvarTable_t gameCvarTable[] = {
     { &pmove_msec,            "pmove_msec",         "8", CVAR_SYSTEMINFO, 0, qfalse, qfalse},
 
     { &g_railJump, 			  "g_railJump",         "0", CVAR_ARCHIVE,    0, qtrue, qfalse},
+    { &g_instagib, 			  "g_instagib",         "0", CVAR_SERVERINFO | CVAR_ARCHIVE,    0, qtrue, qfalse},
 
     //{ &g_rankings, "g_rankings", "0", 0, 0, qfalse},
     { &g_localTeamPref,       "g_localTeamPref",    "",  0,               0, qfalse, qfalse }

@@ -1297,6 +1297,11 @@ BotSelectActivateWeapon
 ==================
 */
 static int BotSelectActivateWeapon(bot_state_t *bs) {
+    extern vmCvar_t g_instagib;
+    if ( g_instagib.integer ) {
+        return WEAPONINDEX_RAILGUN;
+    }
+
     //
     if (bs->inventory[INVENTORY_MACHINEGUN] > 0 && bs->inventory[INVENTORY_BULLETS] > 0)
         return WEAPONINDEX_MACHINEGUN;

@@ -521,6 +521,7 @@ weapon_railgun_fire
 =================
 */
 extern vmCvar_t g_railJump;
+extern vmCvar_t g_instagib;
 qboolean G_RailJump( vec3_t origin, gentity_t *attacker);
 
 #define MAX_RAIL_HITS   4
@@ -539,7 +540,11 @@ static void weapon_railgun_fire (gentity_t *ent) {
     int         passent;
     gentity_t   *unlinkedEntities[MAX_RAIL_HITS];
 
-    damage = 100 * s_quadFactor;
+    if ( g_instagib.integer ) {
+        damage = 666;
+    } else {
+        damage = 100 * s_quadFactor;
+    }
 
     VectorMA (muzzle, 8192, forward, end);
 

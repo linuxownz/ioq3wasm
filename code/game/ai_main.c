@@ -188,6 +188,7 @@ int BotAI_GetClientState( int clientNum, playerState_t *state ) {
 BotAI_GetEntityState
 ==================
 */
+extern vmCvar_t g_instagib;
 int BotAI_GetEntityState( int entityNum, entityState_t *state ) {
     gentity_t   *ent;
 
@@ -195,7 +196,11 @@ int BotAI_GetEntityState( int entityNum, entityState_t *state ) {
     memset( state, 0, sizeof(entityState_t) );
     if (!ent->inuse) return qfalse;
     if (!ent->r.linked) return qfalse;
-    if (ent->r.svFlags & SVF_NOCLIENT) return qfalse;
+
+    if ( ! g_instagib.integer ) {
+        if (ent->r.svFlags & SVF_NOCLIENT)
+            return qfalse;
+    }
     memcpy( state, &ent->s, sizeof(entityState_t) );
     return qtrue;
 }
@@ -1516,9 +1521,11 @@ int BotAIStartFrame(int time) {
                 /*botlib_*/Export_BotLibUpdateEntity(i, NULL);
                 continue;
             }
-            if (ent->r.svFlags & SVF_NOCLIENT) {
-                /*botlib_*/Export_BotLibUpdateEntity(i, NULL);
-                continue;
+            if ( ! g_instagib.integer ) {
+                if (ent->r.svFlags & SVF_NOCLIENT) {
+                    /*botlib_*/Export_BotLibUpdateEntity(i, NULL);
+                    continue;
+                }
             }
             // do not update missiles
             if (ent->s.eType == ET_MISSILE && ent->s.weapon != WP_GRAPPLING_HOOK) {

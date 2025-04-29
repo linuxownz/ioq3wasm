@@ -1633,7 +1633,7 @@ static void PM_Weapon( void ) {
     }
 
     // take an ammo away if not infinite
-    if ( pm->ps->ammo[ pm->ps->weapon ] != -1 ) {
+    if ( pm->ps->ammo[ pm->ps->weapon ] != -1 && pm->ps->ammo[pm->ps->weapon] != 999 ) {
         pm->ps->ammo[ pm->ps->weapon ]--;
     }
 

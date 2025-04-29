@@ -1574,6 +1574,7 @@ int BotSynonymContext(bot_state_t *bs) {
 BotChooseWeapon
 ==================
 */
+extern vmCvar_t g_instagib;
 void BotChooseWeapon(bot_state_t *bs) {
     int newweaponnum;
 
@@ -1582,7 +1583,11 @@ void BotChooseWeapon(bot_state_t *bs) {
         EA_SelectWeapon(bs->client, bs->weaponnum);
     }
     else {
-        newweaponnum = BotChooseBestFightWeapon(bs->ws, bs->inventory);
+        if ( g_instagib.integer ) {
+            newweaponnum = WP_RAILGUN;
+        } else {
+            newweaponnum = BotChooseBestFightWeapon(bs->ws, bs->inventory);
+        }
         if (bs->weaponnum != newweaponnum) bs->weaponchange_time = FloatTime();
         bs->weaponnum = newweaponnum;
         //BotAI_Print(PRT_MESSAGE, "bs->weaponnum = %d\n", bs->weaponnum);
@@ -2210,6 +2215,13 @@ BotAggression
 ==================
 */
 float BotAggression(bot_state_t *bs) {
+
+    if ( g_instagib.integer ) {
+        if (bs->inventory[ENEMY_HEIGHT] > 200)
+            return 0;
+        return 100;
+    }
+
     //if the bot has quad
     if (bs->inventory[INVENTORY_QUAD]) {
         //if the bot is not holding the gauntlet or the enemy is really nearby

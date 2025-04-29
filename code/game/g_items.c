@@ -427,10 +427,16 @@ void RespawnItem( gentity_t *ent ) {
 Touch_Item
 ===============
 */
+extern vmCvar_t g_instagib;
 void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace) {
     UNUSED(trace);
     int         respawn;
     qboolean    predict;
+
+    if ( g_instagib.integer ) {
+        if(ent->item->giType != IT_TEAM)
+            return;
+    }
 
     if (!other->client)
         return;
@@ -738,16 +744,18 @@ void FinishSpawningItem( gentity_t *ent ) {
         return;
     }
 
-    // powerups don't spawn in for a while
-    if ( ent->item->giType == IT_POWERUP ) {
-        float   respawn;
+    if ( ! g_instagib.integer ) {
+        // powerups don't spawn in for a while
+        if ( ent->item->giType == IT_POWERUP ) {
+            float   respawn;
 
-        respawn = 45 + crandom() * 15;
-        ent->s.eFlags |= EF_NODRAW;
-        ent->r.contents = 0;
-        ent->nextthink = level.time + respawn * 1000;
-        ent->think = RespawnItem;
-        return;
+            respawn = 45 + crandom() * 15;
+            ent->s.eFlags |= EF_NODRAW;
+            ent->r.contents = 0;
+            ent->nextthink = level.time + respawn * 1000;
+            ent->think = RespawnItem;
+            return;
+        }
     }
 
     SV_LinkEntity (ent);
@@ -848,9 +856,13 @@ ClearRegisteredItems
 void ClearRegisteredItems( void ) {
     memset( itemRegistered, 0, sizeof( itemRegistered ) );
 
-    // players always start with the base weapon
-    RegisterItem( BG_FindItemForWeapon( WP_MACHINEGUN ) );
-    RegisterItem( BG_FindItemForWeapon( WP_GAUNTLET ) );
+    if ( ! g_instagib.integer ) {
+        // players always start with the base weapon
+        RegisterItem( BG_FindItemForWeapon( WP_MACHINEGUN ) );
+        RegisterItem( BG_FindItemForWeapon( WP_GAUNTLET ) );
+    } else {
+        RegisterItem( BG_FindItemForWeapon( WP_RAILGUN ) );
+    }
 #ifdef MISSIONPACK
     if( g_gametype.integer == GT_HARVESTER ) {
         RegisterItem( BG_FindItem( "Red Cube" ) );
@@ -925,7 +937,56 @@ Items can't be immediately dropped to floor, because they might
 be on an entity that hasn't spawned yet.
 ============
 */
+void G_SpawnItemInstagib(gentity_t* ent, gitem_t* item) {
+
+	if (item->giType != IT_TEAM)
+	{
+
+		G_SpawnFloat("random", "0", &ent->random);
+		G_SpawnFloat("wait", "0", &ent->wait);
+
+		//OERUM
+		//If it's a team item then we want to spwan it. Otherwise make it invisible.
+		if (item->giType == IT_TEAM) {
+			RegisterItem(item);
+			if (G_ItemDisabled(item))
+				return;
+		}
+		else {
+			//Ahh what does this do then
+			ent->r.svFlags = SVF_NOCLIENT;
+			//setting this flag makes the item invisible.
+			ent->s.eFlags |= EF_NODRAW;
+		}
+
+		ent->item = item; // some movers spawn on the second frame, so delay item
+					      // spawns until the third frame so they can ride trains
+		ent->nextthink = level.time + FRAMETIME * 2;
+		ent->think = FinishSpawningItem;
+
+		ent->physicsBounce = 0.50;         // items are bouncy
+		ent->s.eFlags |= EF_NODRAW;
+
+		if (item->giType == IT_POWERUP) {
+			G_SoundIndex("sound/items/poweruprespawn.wav");
+			G_SpawnFloat("noglobalsound", "0", &ent->speed);
+		}
+	}
+
+#ifdef MISSIONPACK
+	if (item->giType == IT_PERSISTANT_POWERUP) {
+		ent->s.generic1 = ent->spawnflags;
+	}
+#endif
+}
+
 void G_SpawnItem (gentity_t *ent, gitem_t *item) {
+
+    if ( g_instagib.integer ) {
+        G_SpawnItemInstagib(ent, item);
+        return;
+    }
+
     G_SpawnFloat( "random", "0", &ent->random );
     G_SpawnFloat( "wait", "0", &ent->wait );
 
