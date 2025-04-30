@@ -93,6 +93,8 @@ vmCvar_t g_spSkill;
 
 extern vmCvar_t bot_developer;
 
+extern vmCvar_t g_freezetag;
+
 vec3_t lastteleport_origin;     //last teleport event origin
 float lastteleport_time;        //last teleport event time
 int max_bspmodelindex;          //maximum BSP model index
@@ -390,7 +392,12 @@ void BotSetTeamStatus(bot_state_t *bs) {
                 teamtask = TEAMTASK_ESCORT;
             }
             else {
-                teamtask = TEAMTASK_FOLLOW;
+//freeze
+				if ( g_freezetag.integer && bs->formation_dist == 70 )
+					teamtask = TEAMTASK_ESCORT;
+				else
+//freeze
+                    teamtask = TEAMTASK_FOLLOW;
             }
             break;
         case LTG_DEFENDKEYAREA:
@@ -490,7 +497,7 @@ int BotSetLastOrderedTask(bot_state_t *bs) {
 BotRefuseOrder
 ==================
 */
-static void BotRefuseOrder(bot_state_t *bs) {
+void BotRefuseOrder(bot_state_t *bs) {
     if (!bs->ordered)
         return;
     // if the bot was ordered to do something
@@ -500,6 +507,11 @@ static void BotRefuseOrder(bot_state_t *bs) {
         bs->order_time = 0;
     }
 }
+
+//freeze
+void BotTeamSeekGoals( bot_state_t *bs );
+//freeze
+
 
 /*
 ==================
@@ -550,12 +562,20 @@ void BotCTFSeekGoals(bot_state_t *bs) {
         return;
     }
     // if the bot decided to follow someone
-    if ( bs->ltgtype == LTG_TEAMACCOMPANY && !bs->ordered ) {
-        // if the team mate being accompanied no longer carries the flag
-        BotEntityInfo(bs->teammate, &entinfo);
-        if (!EntityCarriesFlag(&entinfo)) {
-            bs->ltgtype = 0;
+    if ( ! g_freezetag.integer ) {
+        if ( bs->ltgtype == LTG_TEAMACCOMPANY && !bs->ordered ) {
+            // if the team mate being accompanied no longer carries the flag
+            BotEntityInfo(bs->teammate, &entinfo);
+            if (!EntityCarriesFlag(&entinfo)) {
+                bs->ltgtype = 0;
+            }
         }
+    } else {
+        BotTeamSeekGoals( bs );
+        if ( bs->ltgtype == LTG_TEAMACCOMPANY ) {
+           return;
+        }
+//freeze
     }
     //
     if (BotTeam(bs) == TEAM_RED) flagstatus = bs->redflagstatus * 2 + bs->blueflagstatus;
@@ -1373,6 +1393,11 @@ void BotTeamGoals(bot_state_t *bs, int retreat) {
             BotHarvesterSeekGoals(bs);
         }
 #endif
+//freeze
+		else if ( g_freezetag.integer && gametype == GT_TEAM ) {
+			BotTeamSeekGoals( bs );
+		}
+//freeze
     }
     // reset the order time which is used to see if
     // we decided to refuse an order
@@ -3093,6 +3118,13 @@ int BotTeamFlagCarrierVisible(bot_state_t *bs) {
     int i;
     float vis;
     aas_entityinfo_t entinfo;
+
+//freeze
+	if ( g_freezetag.integer && gametype == GT_CTF ) {
+		return -1;
+	}
+//freeze
+
 
     for (i = 0; i < level.maxclients; i++) {
         if (i == bs->client)

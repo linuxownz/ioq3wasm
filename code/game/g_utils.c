@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "g_local.h"
 
+extern vmCvar_t g_freezetag;
+
 // TODO
 void SV_GetConfigstring( int index, char *buffer, int bufferSize );
 int SV_AreaEntities( const vec3_t mins, const vec3_t maxs, int *entityList, int maxcount );
@@ -543,7 +545,7 @@ void G_KillBox (gentity_t *ent) {
 
     for (i=0 ; i<num ; i++) {
         hit = &g_entities[touch[i]];
-        if ( !hit->client ) {
+        if ( !hit->client || ( g_freezetag.integer && !is_body_freeze( hit ) ) ) {
             continue;
         }
 

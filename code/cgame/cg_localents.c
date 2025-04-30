@@ -164,8 +164,13 @@ void CG_FragmentBounceMark( localEntity_t *le, trace_t *trace ) {
 	if ( le->leMarkType == LEMT_BLOOD ) {
 
 		radius = 16 + (rand()&31);
-		CG_ImpactMark( cgs.media.bloodMarkShader, trace->endpos, trace->plane.normal, random()*360,
-			1,1,1,1, qtrue, radius, qfalse );
+
+//freeze
+		if ( cgs.g_freezetag && le->refEntity.customShader == cgs.media.freezeShader )
+			CG_ImpactMark( cgs.media.freezeMarkShader, trace->endpos, trace->plane.normal, random() * 360, 1, 1, 1, 1, qtrue, radius, qfalse );
+		else
+//freeze
+		    CG_ImpactMark( cgs.media.bloodMarkShader, trace->endpos, trace->plane.normal, random()*360, 1,1,1,1, qtrue, radius, qfalse );
 	} else if ( le->leMarkType == LEMT_BURN ) {
 
 		radius = 8 + (rand()&15);
@@ -265,9 +270,22 @@ void CG_AddFragment( localEntity_t *le ) {
 			le->refEntity.renderfx |= RF_LIGHTING_ORIGIN;
 			oldZ = le->refEntity.origin[2];
 			le->refEntity.origin[2] -= 16 * ( 1.0 - (float)t / SINK_TIME );
+
+//freeze
+            // cg_freezetag will be a CVARGETfromserverinfo ...
+			if ( cgs.g_freezetag )
+                CG_AddGib( le );
+//freeze
+
+
 			RE_AddRefEntityToScene( &le->refEntity );
 			le->refEntity.origin[2] = oldZ;
 		} else {
+//freeze
+			if ( cgs.g_freezetag )
+                CG_AddGib( le );
+//freeze
+
 			RE_AddRefEntityToScene( &le->refEntity );
 		}
 
@@ -289,6 +307,12 @@ void CG_AddFragment( localEntity_t *le ) {
 			BG_EvaluateTrajectory( &le->angles, cg.time, angles );
 			AnglesToAxis( angles, le->refEntity.axis );
 		}
+
+        //freeze
+        if ( cgs.g_freezetag ) {
+            CG_AddGib( le );
+        }
+        //freeze
 
 		RE_AddRefEntityToScene( &le->refEntity );
 
@@ -316,6 +340,10 @@ void CG_AddFragment( localEntity_t *le ) {
 
 	// reflect the velocity on the trace plane
 	CG_ReflectVelocity( le, &trace );
+
+//freeze
+	if ( cgs.g_freezetag ) CG_AddGib( le );
+//freeze
 
 	RE_AddRefEntityToScene( &le->refEntity );
 }

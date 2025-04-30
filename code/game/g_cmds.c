@@ -29,6 +29,8 @@ void SV_GetUserinfo( int index, char *buffer, int bufferSize );
 void SV_SetUserinfo( int index, const char *val );
 void Cmd_Drop_f(gentity_t *ent);
 
+extern vmCvar_t g_freezetag;
+
 #ifdef MISSIONPACK
 #include "../qcommon/menudef.h"           // for the voice chats
 #endif
@@ -479,7 +481,7 @@ Cmd_Kill_f
 =================
 */
 static void Cmd_Kill_f( gentity_t *ent ) {
-    if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR ) {
+    if ( is_spectator(ent->client) /*ent->client->sess.sessionTeam == TEAM_SPECTATOR*/ ) {
         return;
     }
     if (ent->health <= 0) {
@@ -487,7 +489,11 @@ static void Cmd_Kill_f( gentity_t *ent ) {
     }
     ent->flags &= ~FL_GODMODE;
     ent->client->ps.stats[STAT_HEALTH] = ent->health = -999;
-    player_die (ent, ent, ent, 100000, MOD_SUICIDE);
+    if ( ! g_freezetag.integer ) {
+        player_die (ent, ent, ent, 100000, MOD_SUICIDE);
+    } else {
+        player_die (ent, ent, ent, 100000, MOD_BFG_SPLASH); // ??
+    }
 }
 
 /*
@@ -675,6 +681,11 @@ void StopFollowing( gentity_t *ent ) {
 
     SetClientViewAngle( ent, ent->client->ps.viewangles );
 
+    if ( g_freezetag.integer ) {
+        ent->client->ps.stats[ STAT_HEALTH ] = ent->health = 100;
+        memset( ent->client->ps.powerups, 0, sizeof ( ent->client->ps.powerups ) );
+    }
+
     // don't use dead view angles
     if ( ent->client->ps.stats[STAT_HEALTH] <= 0 ) {
         ent->client->ps.stats[STAT_HEALTH] = 1;
@@ -720,6 +731,17 @@ static void Cmd_Team_f( gentity_t *ent ) {
         ent->client->sess.losses++;
     }
 
+
+//freeze
+    if ( g_freezetag.integer && ent->freezeState ) {
+        if ( ent->client->sess.spectatorState == SPECTATOR_FOLLOW ) {
+            StopFollowing( ent );
+        }
+        return;
+    }
+//freeze
+
+
     Cmd_ArgvBuffer( 1, s, sizeof( s ) );
 
     SetTeam( ent, s );
@@ -756,7 +778,15 @@ static void Cmd_Follow_f( gentity_t *ent ) {
     }
 
     // can't follow another spectator
+
+//freeze
+    if ( g_freezetag.integer && ent->freezeState && !is_spectator( ent->client ) ) return;
+//  if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR && level.clients[ i ].sess.sessionTeam != ent->client->sess.sessionTeam ) return;
+    if ( is_spectator( &level.clients[ i ] ) ) {
+//freeze
+/*freeze
     if ( level.clients[ i ].sess.sessionTeam == TEAM_SPECTATOR ) {
+freeze*/
         return;
     }
 
@@ -783,6 +813,14 @@ Cmd_FollowCycle_f
 void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
     int     clientnum;
     int     original;
+
+
+//freeze
+    if ( g_freezetag.integer ) {
+        if ( ent->freezeState && !is_spectator( ent->client ) ) return;
+        if ( Set_Client( ent ) ) return;
+    }
+//freeze
 
     // if they are playing a tournement game, count as a loss
     if ( (g_gametype.integer == GT_TOURNAMENT )
@@ -825,7 +863,27 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
         }
 
         // can't follow another spectator
+
+
+//freeze
+        if ( g_freezetag.integer ) {
+            if ( &level.clients[ clientnum ] == ent->client ) {
+                if ( ent->client->sess.spectatorState == SPECTATOR_FOLLOW ) {
+                    StopFollowing( ent );
+                    ent->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
+                    ent->client->ps.pm_time = 100;
+                    return;
+                }
+            }
+            if ( g_entities[ clientnum ].freezeState ) continue;
+//          if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR && level.clients[ clientnum ].sess.sessionTeam != ent->client->sess.sessionTeam ) continue;
+        }
+
+        if ( is_spectator( &level.clients[ clientnum ] ) ) {
+/*freeze
         if ( level.clients[ clientnum ].sess.sessionTeam == TEAM_SPECTATOR ) {
+freeze*/
+
             continue;
         }
 
@@ -1830,105 +1888,111 @@ void ClientCommand( int clientNum ) {
     else if (Q_stricmp (cmd, "stats") == 0)
         Cmd_Stats_f( ent );
     else if (Q_stricmp (cmd, "drop") == 0) {
-        Cmd_Drop_f(ent);
+        if ( g_freezetag.integer ) {
+            Cmd_Drop_freeze_f(ent);
+        } else {
+            Cmd_Drop_f(ent);
+        }
     }
+    else if ( Q_stricmp( cmd, "ready" ) == 0 )
+		Cmd_Ready_f( ent ); //defined in g_freeze.c
     else
         SV_GameSendServerCommand( clientNum, va("print \"unknown cmd %s\n\"", cmd ) );
 }
 
 gentity_t *DropPowerup( gentity_t *ent ) {
-	gclient_t *cl;
-	gitem_t *gitem;
-	gentity_t *dropped;
-	int seconds;
+    gclient_t *cl;
+    gitem_t *gitem;
+    gentity_t *dropped;
+    int seconds;
 
-	if (!(g_itemDrop.integer & ITEMDROP_POWERUP)) {
-		return NULL;
-	}
+    if (!(g_itemDrop.integer & ITEMDROP_POWERUP)) {
+        return NULL;
+    }
 
-	if (ent->client->ps.pm_type == PM_DEAD) {
-		return NULL;
-	}
+    if (ent->client->ps.pm_type == PM_DEAD) {
+        return NULL;
+    }
 
-	cl = ent->client;
+    cl = ent->client;
 
-	if (PW_FLIGHT < PW_QUAD) {
-		Com_Printf(S_COLOR_YELLOW "Warning: DropPowerup() failed, invalid item order");
-		return NULL;
-	}
+    if (PW_FLIGHT < PW_QUAD) {
+        Com_Printf(S_COLOR_YELLOW "Warning: DropPowerup() failed, invalid item order");
+        return NULL;
+    }
 
-	for (int powerup = PW_QUAD; powerup <= PW_FLIGHT; powerup++) {
-		if (cl->ps.powerups[powerup]) {
-			gitem = BG_FindItemForPowerup( powerup );
-			if (!gitem || gitem->giType != IT_POWERUP) {
-				continue;
-			}
-			seconds = (cl->ps.powerups[powerup] - level.time)/1000;
-			cl->ps.powerups[powerup] = 0;
-			if (seconds <= 0) {
-				// don't drop powerups that have no time left
-				// (this would give whoever picks it up the full duration again)
-				return NULL;
-			}
-			dropped = Drop_ItemNonRandom(ent, gitem, 0 );
-			dropped->count = seconds;
-			return dropped;
-		}
-	}
+    for (int powerup = PW_QUAD; powerup <= PW_FLIGHT; powerup++) {
+        if (cl->ps.powerups[powerup]) {
+            gitem = BG_FindItemForPowerup( powerup );
+            if (!gitem || gitem->giType != IT_POWERUP) {
+                continue;
+            }
+            seconds = (cl->ps.powerups[powerup] - level.time)/1000;
+            cl->ps.powerups[powerup] = 0;
+            if (seconds <= 0) {
+                // don't drop powerups that have no time left
+                // (this would give whoever picks it up the full duration again)
+                return NULL;
+            }
+            dropped = Drop_ItemNonRandom(ent, gitem, 0 );
+            dropped->count = seconds;
+            return dropped;
+        }
+    }
 
     //Com_Printf(S_COLOR_YELLOW "Warning: DropPowerup() failed, no powerup found\n");
-	return NULL;
+    return NULL;
 }
 
 gentity_t *DropFlag( gentity_t *ent ) {
-	int item = 0;
-	if (!(g_itemDrop.integer & ITEMDROP_FLAG)) {
-		return NULL;
-	}
-	if (ent->client->ps.pm_type == PM_DEAD) {
-		return NULL;
-	}
-	if (ent->client->ps.powerups[PW_REDFLAG]) {
-		item = PW_REDFLAG;
-	} else if (ent->client->ps.powerups[PW_BLUEFLAG]) {
-		item = PW_BLUEFLAG;
-	} else if (ent->client->ps.powerups[PW_NEUTRALFLAG]) {
-		item = PW_NEUTRALFLAG;
-	} else {
-		return NULL;
-	}
-	ent->client->ps.powerups[item] = 0;
-	return Drop_ItemNonRandom(ent, BG_FindItemForPowerup( item ), 0 );
+    int item = 0;
+    if (!(g_itemDrop.integer & ITEMDROP_FLAG)) {
+        return NULL;
+    }
+    if (ent->client->ps.pm_type == PM_DEAD) {
+        return NULL;
+    }
+    if (ent->client->ps.powerups[PW_REDFLAG]) {
+        item = PW_REDFLAG;
+    } else if (ent->client->ps.powerups[PW_BLUEFLAG]) {
+        item = PW_BLUEFLAG;
+    } else if (ent->client->ps.powerups[PW_NEUTRALFLAG]) {
+        item = PW_NEUTRALFLAG;
+    } else {
+        return NULL;
+    }
+    ent->client->ps.powerups[item] = 0;
+    return Drop_ItemNonRandom(ent, BG_FindItemForPowerup( item ), 0 );
 }
 
 gentity_t *DropWeapon( gentity_t *ent ) {
-	int weapon;
-	int ammo;
-	gentity_t *item;
+    int weapon;
+    int ammo;
+    gentity_t *item;
 
     Com_Printf("dropweapon...\n");
 
-	if (!(g_itemDrop.integer & ITEMDROP_WEAPON)) {
-		return NULL;
-	}
-	if (ent->client->ps.pm_type == PM_DEAD) {
-		return NULL;
-	}
-	weapon = ent->s.weapon;
-	if ( weapon <= WP_GAUNTLET || weapon >= WP_NUM_WEAPONS) {
-		return NULL;
-	}
-	ammo = ent->client->ps.ammo[weapon];
-	if (ammo == 0) {
-		// don't allow drop of empty guns
-		return NULL;
-	}
-	ent->client->ps.ammo[weapon] = 0;
-	ent->client->ps.stats[STAT_WEAPONS] &= ~(1 << weapon );
-	item = Drop_ItemNonRandom(ent, BG_FindItemForWeapon(weapon), 0);
-	item->count = ammo;
-	//BG_AddPredictableEventToPlayerstate(EV_NOAMMO, 0, &ent->client->ps, -1);
-	ent->client->ps.weaponTime += 500;
+    if (!(g_itemDrop.integer & ITEMDROP_WEAPON)) {
+        return NULL;
+    }
+    if (ent->client->ps.pm_type == PM_DEAD) {
+        return NULL;
+    }
+    weapon = ent->s.weapon;
+    if ( weapon <= WP_GAUNTLET || weapon >= WP_NUM_WEAPONS) {
+        return NULL;
+    }
+    ammo = ent->client->ps.ammo[weapon];
+    if (ammo == 0) {
+        // don't allow drop of empty guns
+        return NULL;
+    }
+    ent->client->ps.ammo[weapon] = 0;
+    ent->client->ps.stats[STAT_WEAPONS] &= ~(1 << weapon );
+    item = Drop_ItemNonRandom(ent, BG_FindItemForWeapon(weapon), 0);
+    item->count = ammo;
+    //BG_AddPredictableEventToPlayerstate(EV_NOAMMO, 0, &ent->client->ps, -1);
+    ent->client->ps.weaponTime += 500;
 
     int bits = ent->client->ps.stats[STAT_WEAPONS];
     for ( int i = 15 ; i >= 0; i-- ) {
@@ -1938,28 +2002,28 @@ gentity_t *DropWeapon( gentity_t *ent ) {
         }
     }
 
-	return item;
+    return item;
 }
 
 void Cmd_Drop_f( gentity_t *ent ) {
-	gentity_t *item = NULL;
+    gentity_t *item = NULL;
 
-	if (g_itemDrop.integer & ITEMDROP_FLAG && (ent->client->ps.powerups[PW_REDFLAG] || ent->client->ps.powerups[PW_BLUEFLAG] || ent->client->ps.powerups[PW_NEUTRALFLAG])) {
-		item = DropFlag(ent);
-	}
+    if (g_itemDrop.integer & ITEMDROP_FLAG && (ent->client->ps.powerups[PW_REDFLAG] || ent->client->ps.powerups[PW_BLUEFLAG] || ent->client->ps.powerups[PW_NEUTRALFLAG])) {
+        item = DropFlag(ent);
+    }
 
     if ( !item && g_itemDrop.integer & ITEMDROP_POWERUP) {
-		item = DropPowerup(ent);
+        item = DropPowerup(ent);
     }
 
     if ( !item && g_itemDrop.integer & ITEMDROP_WEAPON) {
-		item = DropWeapon(ent);
-	}
+        item = DropWeapon(ent);
+    }
 
 
-	if (item != NULL) {
-		item->dropTime = level.time;
-		item->s.time = level.time; // so client can know about it and avoid predicting pickup
-	}
+    if (item != NULL) {
+        item->dropTime = level.time;
+        item->s.time = level.time; // so client can know about it and avoid predicting pickup
+    }
 }
 

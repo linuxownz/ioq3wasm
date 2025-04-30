@@ -239,9 +239,19 @@ void CG_DrawInformation( void ) {
         break;
     case GT_TEAM:
         s = "Team Deathmatch";
+//freeze
+        if ( cgs.g_freezetag ) {
+            s = "FreezeTag";
+        }
+//freeze
         break;
     case GT_CTF:
         s = "Capture The Flag";
+//freeze
+        if ( cgs.g_freezetag) {
+            s = "FreezeTag CTF";
+        }
+//freeze
         break;
 #ifdef MISSIONPACK
     case GT_1FCTF:

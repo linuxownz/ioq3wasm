@@ -168,6 +168,7 @@ void CG_ParseServerinfo( void ) {
     cgs.capturelimit = atoi( Info_ValueForKey( info, "capturelimit" ) );
     cgs.timelimit    = atoi( Info_ValueForKey( info, "timelimit" ) );
     cgs.maxclients   = atoi( Info_ValueForKey( info, "sv_maxclients" ) );
+    cgs.g_freezetag  = atoi( Info_ValueForKey( info, "g_freezetag" ) ) ;
 
     const char *mapname = Info_ValueForKey( info, "mapname" );
     Com_sprintf( cgs.mapname, sizeof( cgs.mapname ), "maps/%s.bsp", mapname );
@@ -177,6 +178,10 @@ void CG_ParseServerinfo( void ) {
 
     Q_strncpyz( cgs.blueTeam, Info_ValueForKey( info, "g_blueTeam" ), sizeof(cgs.blueTeam) );
     Cvar_SetSafe("g_blueTeam", cgs.blueTeam);
+}
+
+qboolean CG_GetFreezeTag( void ) {
+    return cgs.g_freezetag;
 }
 
 /*

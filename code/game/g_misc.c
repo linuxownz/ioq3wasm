@@ -76,9 +76,20 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles ) {
     qboolean noAngles;
 
     noAngles = (angles[0] > 999999.0);
+
+    //freeze
+    qboolean is_spec = player->client->sess.sessionTeam != TEAM_SPECTATOR;
+
+    extern vmCvar_t g_freezetag;
+    if ( g_freezetag.integer ) {
+        is_spec = is_spectator(player->client);
+    }
+    //freeze
+
+
     // use temp events at source and destination to prevent the effect
     // from getting dropped by a second player event
-    if ( player->client->sess.sessionTeam != TEAM_SPECTATOR ) {
+    if ( is_spec /*player->client->sess.sessionTeam != TEAM_SPECTATOR*/ ) {
         tent = G_TempEntity( player->client->ps.origin, EV_PLAYER_TELEPORT_OUT );
         tent->s.clientNum = player->s.clientNum;
 
@@ -106,7 +117,7 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles ) {
     G_ResetHistory( player );
 
     // kill anything at the destination
-    if ( player->client->sess.sessionTeam != TEAM_SPECTATOR ) {
+    if ( is_spec /*player->client->sess.sessionTeam != TEAM_SPECTATOR*/ ) {
         G_KillBox (player);
     }
 
@@ -116,7 +127,7 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles ) {
     // use the precise origin for linking
     VectorCopy( player->client->ps.origin, player->r.currentOrigin );
 
-    if ( player->client->sess.sessionTeam != TEAM_SPECTATOR ) {
+    if ( is_spec /*player->client->sess.sessionTeam != TEAM_SPECTATOR*/ ) {
         SV_LinkEntity (player);
     }
 }

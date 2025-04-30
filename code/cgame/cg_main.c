@@ -983,6 +983,12 @@ static void CG_RegisterGraphics2(void) {
     cgs.media.regenShader        = RE_RegisterShader("powerups/regen" );
     cgs.media.hastePuffShader    = RE_RegisterShader("hasteSmokePuff" );
 
+//freeze
+// TODO don't forget to add these shaders
+	cgs.media.freezeShader     = RE_RegisterShader( "freezeShader" );
+	cgs.media.freezeMarkShader = RE_RegisterShader( "freezeMarkShader" );
+//freeze
+
 #ifdef MISSIONPACK
     if ( cgs.gametype == GT_HARVESTER || cg_buildScript.integer ) {
         cgs.media.redCubeModel  = RE_RegisterModel( "models/powerups/orb/r_orb.md3" );
@@ -1732,11 +1738,23 @@ static const char *CG_FeederItemText(float feederID, int index, int column, qhan
                 if (team == -1) {
                     return "";
                 } else {
-                    *handle = CG_StatusHandle(info->teamTask);
+
+//freeze
+					if ( cg_freezetag.integer && Q_Isfreeze( sp->client ) )
+						*handle = cgs.media.noammoShader;
+					else
+//freeze
+                        *handle = CG_StatusHandle(info->teamTask);
                 }
           break;
             case 2:
                 if ( cg.snap->ps.stats[ STAT_CLIENTS_READY ] & ( 1 << sp->client ) ) {
+
+
+//freeze
+					if ( ! cg_freezetag.integer || !Q_Isfreeze( sp->client ) )
+//freeze
+
                     return "Ready";
                 }
                 if (team == -1) {

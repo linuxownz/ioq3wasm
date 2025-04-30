@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../qcommon/q_shared_client.h"
 #endif
 
+
+
 #include "bg_public.h"
 
 /*QUAKED item_***** ( 0 0 0 ) (-16 -16 -16) (16 16 16) suspended
@@ -1041,20 +1043,44 @@ Returns false if the item should not be picked up.
 This needs to be the same for client side prediction and server use.
 ================
 */
+
 qboolean BG_CanItemBeGrabbed( int gametype, const entityState_t *ent, const playerState_t *ps ) {
     gitem_t *item;
 #ifdef MISSIONPACK
     int     upperBound;
+#endif
+    qboolean is_freezetag = qfalse;
+
+#ifdef SERVER
+extern vmCvar_t g_freezetag;
+is_freezetag = g_freezetag.integer;
+#else
+qboolean CG_GetFreezeTag( void );
+is_freezetag = CG_GetFreezeTag();
 #endif
 
     if ( ent->modelindex < 1 || ent->modelindex >= bg_numItems ) {
         Com_Error( ERR_DROP, "BG_CanItemBeGrabbed: index out of range" );
     }
 
+//freeze
+
+	if ( is_freezetag && ent->modelindex2 == 1 && ent->otherEntityNum == ps->clientNum + 1 ) {
+		return qfalse;
+	}
+//freeze
+
     item = &bg_itemlist[ent->modelindex];
 
     switch( item->giType ) {
     case IT_WEAPON:
+
+//freeze
+		if ( is_freezetag && ent->modelindex2 == 255 && ps->stats[ STAT_WEAPONS ] & ( 1 << item->giTag ) ) {
+			return qfalse;
+		}
+//freeze
+
         return qtrue;   // weapons are always picked up
 
     case IT_AMMO:

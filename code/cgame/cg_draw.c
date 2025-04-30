@@ -419,6 +419,11 @@ void CG_DrawHead( float x, float y, float w, float h, int clientNum, vec3_t head
     if ( ci->deferred ) {
         CG_DrawPic( x, y, w, h, cgs.media.deferShader );
     }
+//freeze
+    else if ( cgs.g_freezetag && Q_Isfreeze( clientNum ) ) {
+		CG_DrawPic( x, y, w, h, cgs.media.noammoShader );
+    }
+//freeze
 }
 
 /*

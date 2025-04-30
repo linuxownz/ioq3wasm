@@ -32,6 +32,7 @@ void G_UnTimeShiftAllClients( gentity_t *skip );
 
 void G_UnTimeShiftClient( gentity_t *self );
 
+extern vmCvar_t g_freezetag;
 /*
 ============
 ScorePlum
@@ -120,7 +121,7 @@ void AddScore( gentity_t *ent, vec3_t origin, int score ) {
     ScorePlum(ent, origin, score);
     //
     ent->client->ps.persistant[PERS_SCORE] += score;
-    if ( g_gametype.integer == GT_TEAM )
+    if ( ! g_freezetag.integer && g_gametype.integer == GT_TEAM )
         level.teamScores[ ent->client->ps.persistant[PERS_TEAM] ] += score;
     CalculateRanks();
 }
@@ -168,7 +169,23 @@ void TossClientItems( gentity_t *self ) {
     }
 
     // drop all the powerups if not in teamplay
-    if ( g_gametype.integer != GT_TEAM ) {
+//freeze
+    if ( g_freezetag.integer || g_gametype.integer != GT_TEAM ) {
+
+        if ( g_freezetag.integer ) {
+            for ( i = 1; i < HI_NUM_HOLDABLE; i++ ) {
+                if ( i == HI_KAMIKAZE ) continue;
+                if ( bg_itemlist[ self->client->ps.stats[ STAT_HOLDABLE_ITEM ] ].giTag == i ) {
+                    item = BG_FindItemForHoldable( i );
+                    if ( !item ) break;
+                    drop = Drop_Item( self, item, 45 );
+                    break;
+                }
+            }
+        }
+
+
+//freeze
         angle = 45;
         for ( i = 1 ; i < PW_NUM_POWERUPS ; i++ ) {
             if ( self->client->ps.powerups[ i ] > level.time ) {
@@ -647,7 +664,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
         if ( client->pers.connected != CON_CONNECTED ) {
             continue;
         }
-        if ( client->sess.sessionTeam != TEAM_SPECTATOR ) {
+        if ( !is_spectator( client ) /*client->sess.sessionTeam != TEAM_SPECTATOR*/ ) {
             continue;
         }
         if ( client->sess.spectatorClient == self->s.number ) {
@@ -669,7 +686,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
     self->s.loopSound = 0;
 
-    self->r.maxs[2] = -8;
+    if ( ! g_freezetag.integer )
+        self->r.maxs[2] = -8;
 
     // don't allow respawn until the death anim is done
     // g_forcerespawn may force spawning at some later time
@@ -681,6 +699,20 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
     // remove powerups
     memset( self->client->ps.powerups, 0, sizeof(self->client->ps.powerups) );
+
+
+//freeze
+    if ( g_freezetag.integer ) {
+        player_freeze( self, attacker, meansOfDeath );
+        if ( self->freezeState ) {
+            G_AddEvent( self, EV_DEATH1 + ( rand() % 3 ), killer );
+            SV_LinkEntity( self );
+            return;
+        }
+        self->r.maxs[ 2 ] = -8;
+    }
+//freeze
+
 
     // never gib in a nodrop
     contents = SV_PointContents( self->r.currentOrigin, -1 );
@@ -777,9 +809,7 @@ static int CheckArmor (gentity_t *ent, int damage, int dflags)
 RaySphereIntersections
 ================
 */
-#if 0
-//unused
-static int RaySphereIntersections( vec3_t origin, float radius, vec3_t point, vec3_t dir, vec3_t intersections[2] ) {
+int RaySphereIntersections( vec3_t origin, float radius, vec3_t point, vec3_t dir, vec3_t intersections[2] ) {
     float b, c, d, t;
 
     //  | origin - (point + t * dir) | = radius
@@ -810,7 +840,6 @@ static int RaySphereIntersections( vec3_t origin, float radius, vec3_t point, ve
     }
     return 0;
 }
-#endif
 
 #ifdef MISSIONPACK
 /*
@@ -1018,6 +1047,17 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         if ( targ->flags & FL_GODMODE ) {
             return;
         }
+
+//freeze
+        if ( g_freezetag.integer ) {
+            if ( client ) {
+                if ( targ != attacker && level.time - client->respawnTime < 1000 ) return;
+            } else {
+                if ( DamageBody( targ, attacker, dir, mod, knockback ) ) return;
+            }
+        }
+//freeze
+
     }
 
     // battlesuit protects from all radius damage (but takes knockback)

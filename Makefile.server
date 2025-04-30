@@ -230,6 +230,7 @@ Q3DEDBASEGAMEFILES = \
 	$(CODE_DIR)/game/ai_cmd.c \
 	$(CODE_DIR)/game/ai_dmnet.c \
 	$(CODE_DIR)/game/ai_dmq3.c \
+	$(CODE_DIR)/game/ai_freeze.c \
 	$(CODE_DIR)/game/ai_main.c \
 	$(CODE_DIR)/game/ai_team.c \
 	$(CODE_DIR)/game/ai_vcmd.c \
@@ -242,6 +243,7 @@ Q3DEDBASEGAMEFILES = \
 	$(CODE_DIR)/game/g_client.c \
 	$(CODE_DIR)/game/g_cmds.c \
 	$(CODE_DIR)/game/g_combat.c \
+	$(CODE_DIR)/game/g_freeze.c \
 	$(CODE_DIR)/game/g_items.c \
 	$(CODE_DIR)/game/g_main.c \
 	$(CODE_DIR)/game/g_mem.c \

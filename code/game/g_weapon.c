@@ -72,6 +72,7 @@ static void Weapon_Gauntlet( gentity_t *ent ) {
 CheckGauntletAttack
 ===============
 */
+extern vmCvar_t g_freezetag;
 qboolean CheckGauntletAttack( gentity_t *ent ) {
     trace_t     tr;
     vec3_t      end;
@@ -105,6 +106,15 @@ qboolean CheckGauntletAttack( gentity_t *ent ) {
         tent->s.weapon = ent->s.weapon;
     }
 
+    //freeze
+	if ( g_freezetag.integer && is_body( traceEnt ) ) {
+		tent = G_TempEntity( tr.endpos, EV_MISSILE_HIT );
+		tent->s.otherEntityNum = traceEnt->s.number;
+		tent->s.eventParm = DirToByte( tr.plane.normal );
+		tent->s.weapon = ent->s.weapon;
+	}
+    //freeze
+
     if ( !traceEnt->takedamage) {
         return qfalse;
     }
@@ -120,6 +130,12 @@ qboolean CheckGauntletAttack( gentity_t *ent ) {
         s_quadFactor *= 2;
     }
 #endif
+
+    //freeze
+	if ( g_freezetag.integer && g_dmflags.integer & 1024 && !( g_weaponlimit.integer & 2048 ) ) {
+		s_quadFactor = 8;
+	}
+    //freeze
 
     damage = 50 * s_quadFactor;
     G_Damage( traceEnt, ent, ent, forward, tr.endpos,
@@ -214,6 +230,13 @@ static void Bullet_Fire (gentity_t *ent, float spread, int damage, int mod ) {
             if( LogAccuracyHit( traceEnt, ent ) ) {
                 ent->client->accuracy_hits++;
             }
+
+        //freeze
+		} else if ( g_freezetag.integer && is_body( traceEnt ) ) {
+			tent = G_TempEntity( tr.endpos, EV_BULLET_HIT_FLESH );
+			tent->s.eventParm = traceEnt->s.number;
+        //freeze
+
         } else {
             tent = G_TempEntity( tr.endpos, EV_BULLET_HIT_WALL );
             tent->s.eventParm = DirToByte( tr.plane.normal );
@@ -672,6 +695,14 @@ GRAPPLING HOOK
 
 static void Weapon_GrapplingHook_Fire (gentity_t *ent)
 {
+
+//freeze
+    if ( g_freezetag.integer ) {
+        AngleVectors( ent->client->ps.viewangles, forward, right, up );
+        CalcMuzzlePoint( ent, forward, right, up, muzzle );
+    }
+//freeze
+
     if (!ent->client->fireHeld && !ent->client->hook)
         fire_grapple (ent, muzzle, forward);
 
@@ -680,6 +711,14 @@ static void Weapon_GrapplingHook_Fire (gentity_t *ent)
 
 void Weapon_HookFree (gentity_t *ent)
 {
+
+//freeze
+    if ( g_freezetag.integer ) {
+	    ent->parent->timestamp = level.time;
+    }
+//freeze
+
+
     ent->parent->client->hook = NULL;
     ent->parent->client->ps.pm_flags &= ~PMF_GRAPPLE_PULL;
     G_FreeEntity( ent );
@@ -778,6 +817,16 @@ static void Weapon_LightningFire( gentity_t *ent ) {
             tent->s.otherEntityNum = traceEnt->s.number;
             tent->s.eventParm = DirToByte( tr.plane.normal );
             tent->s.weapon = ent->s.weapon;
+
+//freeze
+		} else if ( g_freezetag.integer && is_body( traceEnt ) ) {
+			tent = G_TempEntity( tr.endpos, EV_MISSILE_HIT );
+			tent->s.otherEntityNum = traceEnt->s.number;
+			tent->s.eventParm = DirToByte( tr.plane.normal );
+			tent->s.weapon = ent->s.weapon;
+//freeze
+
+
         } else if ( !( tr.surfaceFlags & SURF_NOIMPACT ) ) {
             tent = G_TempEntity( tr.endpos, EV_MISSILE_MISS );
             tent->s.eventParm = DirToByte( tr.plane.normal );
@@ -923,6 +972,12 @@ void FireWeapon( gentity_t *ent ) {
         s_quadFactor *= 2;
     }
 #endif
+
+//freeze
+	if ( g_freezetag.integer && g_dmflags.integer & 1024 ) {
+		s_quadFactor = 8;
+	}
+//freeze
 
     // track shots taken for accuracy tracking.  Grapple is not a weapon and gauntet is just not tracked
     if( ent->s.weapon != WP_GRAPPLING_HOOK && ent->s.weapon != WP_GAUNTLET ) {

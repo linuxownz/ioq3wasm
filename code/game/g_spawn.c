@@ -269,6 +269,7 @@ Finds the spawn function for the entity and calls it,
 returning qfalse if not found
 ===============
 */
+extern vmCvar_t g_freezetag;
 static qboolean G_CallSpawn( gentity_t *ent ) {
     spawn_t *s;
     gitem_t *item;
@@ -281,6 +282,17 @@ static qboolean G_CallSpawn( gentity_t *ent ) {
     // check item spawn functions
     for ( item=bg_itemlist+1 ; item->classname ; item++ ) {
         if ( !strcmp(item->classname, ent->classname) ) {
+
+//freeze
+            if ( g_freezetag.integer ) {
+                locationSpawn( ent, item );
+                if ( WeaponDisabled( item ) ) {
+                    return qfalse;
+                }
+            }
+//freeze
+
+
             G_SpawnItem( ent, item );
             return qtrue;
         }
@@ -423,7 +435,9 @@ static void G_SpawnGEntityFromSpawnVars( void ) {
     // check for "notteam" flag (GT_FFA, GT_TOURNAMENT, GT_SINGLE_PLAYER)
     if ( g_gametype.integer >= GT_TEAM ) {
         G_SpawnInt( "notteam", "0", &i );
-        if ( i ) {
+//freeze
+        if ( i && !( g_freezetag.integer && ent->classname && !Q_stricmp( ent->classname, "info_player_deathmatch" ) ) ) {
+//freeze
             ADJUST_AREAPORTAL();
             G_FreeEntity( ent );
             return;

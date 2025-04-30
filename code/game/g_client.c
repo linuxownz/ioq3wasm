@@ -34,6 +34,8 @@ void SV_GetUsercmd( int clientNum, usercmd_t *cmd );
 static vec3_t   playerMins = {-15, -15, -24};
 static vec3_t   playerMaxs = {15, 15, 32};
 
+extern vmCvar_t g_freezetag;
+
 /*QUAKED info_player_deathmatch (1 0 1) (-16 -16 -24) (16 16 32) initial
 potential spawning position for deathmatch games.
 The first time a player enters the game, they will be at an 'initial' spot.
@@ -150,9 +152,7 @@ go to a random point that doesn't telefrag
 ================
 */
 #define MAX_SPAWN_POINTS    128
-#if 0
-// unused
-static gentity_t *SelectRandomDeathmatchSpawnPoint(qboolean isbot) {
+gentity_t *SelectRandomDeathmatchSpawnPoint(qboolean isbot) {
     gentity_t   *spot;
     int         count;
     int         selection;
@@ -184,7 +184,6 @@ static gentity_t *SelectRandomDeathmatchSpawnPoint(qboolean isbot) {
     selection = rand() % count;
     return spots[ selection ];
 }
-#endif
 
 /*
 ===========
@@ -540,10 +539,23 @@ void SetClientViewAngle( gentity_t *ent, vec3_t angle ) {
 ClientRespawn
 ================
 */
+// this is respawn in the freezetag sources...
 void ClientRespawn( gentity_t *ent ) {
+
+    //freeze
+    if ( g_freezetag.integer ) {
+	    if ( Set_spectator( ent ) ) return;
+    }
+    //freeze
 
     CopyToBodyQue (ent);
     ClientSpawn(ent);
+
+    // TEST this was added from freeze but no part of freeze TODO test
+	// add a teleportation effect
+	gentity_t * tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_IN );
+	tent->s.clientNum = ent->s.clientNum;
+    // TEST this was added from freeze but no part of freeze TODO test
 }
 
 /*
@@ -975,6 +987,16 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
     }
     G_ReadSessionData( client );
 
+
+//freeze
+	if ( g_freezetag.integer && g_gametype.integer != GT_TOURNAMENT ) {
+		client->sess.wins = 0;
+	}
+	ent->freezeState = qfalse;
+	ent->readyBegin = qfalse;
+//freeze
+
+
     // get and distribute relevant parameters
     G_LogPrintf( "ClientConnect: %i\n", clientNum );
     ClientUserinfoChanged( clientNum );
@@ -1233,13 +1255,18 @@ void ClientSpawn(gentity_t *ent) {
     client->ps.legsAnim = LEGS_IDLE;
 
     if (!level.intermissiontime) {
-        if (ent->client->sess.sessionTeam != TEAM_SPECTATOR) {
+        if (! is_spectator(ent->client) /*ent->client->sess.sessionTeam != TEAM_SPECTATOR*/) {
             G_KillBox(ent);
             // force the base weapon up
             client->ps.weapon = WP_MACHINEGUN;
             client->ps.weaponstate = WEAPON_READY;
             // fire the targets of the spawn point
-            G_UseTargets(spawnPoint, ent);
+
+//freeze
+            if ( ! g_freezetag.integer || !( g_dmflags.integer & 1024 ) )
+//freeze
+                G_UseTargets(spawnPoint, ent);
+
             // select the highest weapon number available, after any spawn given items have fired
             client->ps.weapon = 1;
 
@@ -1249,6 +1276,23 @@ void ClientSpawn(gentity_t *ent) {
                     break;
                 }
             }
+
+//freeze
+        if ( g_freezetag.integer ) {
+            if ( client->ps.stats[ STAT_WEAPONS ] & ( 1 << WP_ROCKET_LAUNCHER ) ) {
+                client->ps.weapon = WP_ROCKET_LAUNCHER;
+            }
+
+            if ( g_startArmor.integer > 0 ) {
+                client->ps.stats[ STAT_ARMOR ] += g_startArmor.integer;
+                if ( client->ps.stats[ STAT_ARMOR ] > client->ps.stats[ STAT_MAX_HEALTH ] * 2 ) {
+                    client->ps.stats[ STAT_ARMOR ] = client->ps.stats[ STAT_MAX_HEALTH ] * 2;
+                }
+            }
+        }
+//freeze
+
+
             // positively link the client, even if the command times are weird
             VectorCopy(ent->client->ps.origin, ent->r.currentOrigin);
 
@@ -1256,6 +1300,12 @@ void ClientSpawn(gentity_t *ent) {
             tent->s.clientNum = ent->s.clientNum;
 
             SV_LinkEntity (ent);
+
+//freeze
+            if ( g_freezetag.integer ) {
+                SpawnWeapon( client );
+            }
+//freeze
         }
     } else {
         // move players to intermission
@@ -1305,16 +1355,14 @@ void ClientDisconnect( int clientNum ) {
 
     // stop any following clients
     for ( i = 0 ; i < level.maxclients ; i++ ) {
-        if ( level.clients[i].sess.sessionTeam == TEAM_SPECTATOR
-            && level.clients[i].sess.spectatorState == SPECTATOR_FOLLOW
-            && level.clients[i].sess.spectatorClient == clientNum ) {
+        //if ( level.clients[i].sess.sessionTeam == TEAM_SPECTATOR && level.clients[i].sess.spectatorState == SPECTATOR_FOLLOW && level.clients[i].sess.spectatorClient == clientNum )
+        if ( is_spectator( &level.clients[i] ) ) {
             StopFollowing( &g_entities[i] );
         }
     }
 
     // send effect if they were completely connected
-    if ( ent->client->pers.connected == CON_CONNECTED
-        && ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
+    if ( ent->client->pers.connected == CON_CONNECTED && ! is_spectator(ent->client) /*ent->client->sess.sessionTeam != TEAM_SPECTATOR*/ ) {
         tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_OUT );
         tent->s.clientNum = ent->s.clientNum;
 

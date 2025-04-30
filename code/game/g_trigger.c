@@ -285,8 +285,7 @@ void trigger_teleporter_touch (gentity_t *self, gentity_t *other, trace_t *trace
         return;
     }
     // Spectators only?
-    if ( ( self->spawnflags & 1 ) &&
-        other->client->sess.sessionTeam != TEAM_SPECTATOR ) {
+    if ( ( self->spawnflags & 1 ) && !is_spectator(other->client ) /*other->client->sess.sessionTeam != TEAM_SPECTATOR*/ ) {
         return;
     }
 

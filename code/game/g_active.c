@@ -278,7 +278,7 @@ void    G_TouchTriggers( gentity_t *ent ) {
         }
 
         // ignore most entities if a spectator
-        if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR ) {
+        if ( is_spectator( ent->client ) /*ent->client->sess.sessionTeam == TEAM_SPECTATOR*/ ) {
             if ( hit->s.eType != ET_TELEPORT_TRIGGER &&
                 // this is ugly but adding a new ET_? type will
                 // most likely cause network incompatibilities
@@ -322,6 +322,7 @@ void    G_TouchTriggers( gentity_t *ent ) {
 SpectatorThink
 =================
 */
+extern vmCvar_t g_freezetag;
 static void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
     pmove_t pm;
     gclient_t   *client;
@@ -346,6 +347,13 @@ static void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
         pm.ps = &client->ps;
         pm.cmd = *ucmd;
         pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;   // spectators can fly through bodies
+
+//freeze
+		if ( g_freezetag.integer && g_dmflags.integer & 512 ) {
+			pm.tracemask &= ~CONTENTS_PLAYERCLIP;
+		}
+//freeze
+
         pm.trace = SV_Trace;
         pm.pointcontents = SV_PointContents;
 
@@ -365,6 +373,13 @@ static void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
     if ( ( client->buttons & BUTTON_ATTACK ) && ! ( client->oldbuttons & BUTTON_ATTACK ) ) {
         Cmd_FollowCycle_f( ent, 1 );
     }
+
+//freeze
+	else if ( g_freezetag.integer ) {
+		respawnSpectator( ent );
+	}
+//freeze
+
 }
 
 /*
@@ -384,6 +399,15 @@ static qboolean ClientInactivityTimer( gclient_t *client ) {
         client->inactivityTime = level.time + g_inactivity.integer * 1000;
         client->inactivityWarning = qfalse;
     } else if ( !client->pers.localClient ) {
+
+
+//freeze
+		if ( g_freezetag.integer && g_entities[ client->ps.clientNum ].freezeState ) {
+			return qtrue;
+		}
+//freeze
+
+
         if ( level.time > client->inactivityTime ) {
             SV_GameDropClient( client - level.clients, "Dropped due to inactivity" );
             return qfalse;
@@ -822,7 +846,7 @@ static void ClientThink_real( gentity_t *ent ) {
     }
 
     // spectators don't do much
-    if ( client->sess.sessionTeam == TEAM_SPECTATOR ) {
+    if ( is_spectator(client) /*client->sess.sessionTeam == TEAM_SPECTATOR*/ ) {
         if ( client->sess.spectatorState == SPECTATOR_SCOREBOARD ) {
             return;
         }
@@ -868,6 +892,12 @@ static void ClientThink_real( gentity_t *ent ) {
         client->hook && !( ucmd->buttons & BUTTON_ATTACK ) ) {
         Weapon_HookFree(client->hook);
     }
+
+    //freeze
+    if ( g_freezetag.integer ) {
+	    Hook_Fire( ent );
+    }
+    //freeze
 
     // set up for pmove
     oldEventSequence = client->ps.eventSequence;
@@ -923,6 +953,11 @@ static void ClientThink_real( gentity_t *ent ) {
     }
     else {
         pm.tracemask = MASK_PLAYERSOLID;
+//freeze
+		if ( g_freezetag.integer && g_dmflags.integer & 512 ) {
+			pm.tracemask &= ~CONTENTS_PLAYERCLIP;
+		}
+//freeze
     }
 
     pm.trace         = SV_Trace;
@@ -1083,24 +1118,33 @@ static void SpectatorClientEndFrame( gentity_t *ent ) {
         } else if ( clientNum == -2 ) {
             clientNum = level.follow2;
         }
+
         if ( clientNum >= 0 ) {
             cl = &level.clients[ clientNum ];
-            if ( cl->pers.connected == CON_CONNECTED && cl->sess.sessionTeam != TEAM_SPECTATOR ) {
+            if ( cl->pers.connected == CON_CONNECTED && !is_spectator( cl ) /*cl->sess.sessionTeam != TEAM_SPECTATOR*/ ) {
                 flags = (cl->ps.eFlags & ~(EF_VOTED | EF_TEAMVOTED)) | (ent->client->ps.eFlags & (EF_VOTED | EF_TEAMVOTED));
-                ent->client->ps = cl->ps;
+                if ( ! g_freezetag.integer ) {
+                    ent->client->ps = cl->ps;
+                } else {
+                    Persistant_spectator( ent, cl );
+                }
                 ent->client->ps.pm_flags |= PMF_FOLLOW;
                 ent->client->ps.eFlags = flags;
                 return;
-            }
-        }
+            } else if ( g_freezetag.integer || ent->client->ps.pm_flags & PMF_FOLLOW ) {
+                // THIS ELSE added to match freezetag ...  TODO NEEDS TESTING
+                // https://github.com/dbircsak/freeze-tag/blob/7ced72cea36c28daa43d9ba6267cb6f660eedcec/quake3/code/game/g_active.c#L1100
 
-        if ( ent->client->ps.pm_flags & PMF_FOLLOW ) {
-            // drop them to free spectators unless they are dedicated camera followers
-            if ( ent->client->sess.spectatorClient >= 0 ) {
-                ent->client->sess.spectatorState = SPECTATOR_FREE;
+                // drop them to free spectators unless they are dedicated camera followers
+                if ( ent->client->sess.spectatorClient >= 0 ) {
+                    if ( ! g_freezetag.integer) {
+                        ent->client->sess.spectatorState = SPECTATOR_FREE;
+                        ClientBegin( ent->client - level.clients );
+                    } else {
+                        StopFollowing( ent );
+                    }
+                }
             }
-
-            ClientBegin( ent->client - level.clients );
         }
     }
 
@@ -1142,7 +1186,7 @@ void ClientEndFrame( gentity_t *ent ) {
         return;
     }
 
-    if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR ) {
+    if ( is_spectator (ent->client ) /*ent->client->sess.sessionTeam == TEAM_SPECTATOR*/ ) {
         SpectatorClientEndFrame( ent );
         return;
     }

@@ -94,6 +94,16 @@ vmCvar_t g_itemDrop;
 vmCvar_t g_unlagged;
 vmCvar_t g_predictPVS;
 
+//freeze
+vmCvar_t    g_freezetag;
+//vmCvar_t  g_grapple;
+vmCvar_t    g_wpflags;
+vmCvar_t    g_weaponlimit;
+vmCvar_t    g_doReady;
+vmCvar_t    g_startArmor;
+vmCvar_t    g_votelimit;
+//freeze
+
 //#ifdef MISSIONPACK
 vmCvar_t g_obeliskHealth;
 vmCvar_t g_obeliskRegenPeriod;
@@ -192,8 +202,22 @@ static cvarTable_t gameCvarTable[] = {
     { &pmove_fixed,           "pmove_fixed",        "1", CVAR_SYSTEMINFO, 0, qfalse, qfalse},
     { &pmove_msec,            "pmove_msec",         "8", CVAR_SYSTEMINFO, 0, qfalse, qfalse},
 
-    { &g_railJump, 			  "g_railJump",         "0", CVAR_ARCHIVE,    0, qtrue, qfalse},
-    { &g_instagib, 			  "g_instagib",         "0", CVAR_SERVERINFO | CVAR_ARCHIVE,    0, qtrue, qfalse},
+    { &g_railJump,            "g_railJump",         "0", CVAR_ARCHIVE,    0, qtrue, qfalse},
+    { &g_instagib,            "g_instagib",         "0", CVAR_SERVERINFO | CVAR_ARCHIVE,    0, qtrue, qfalse},
+
+
+    //freeze
+    { &g_freezetag,           "g_freezetag",        "0", CVAR_SERVERINFO | CVAR_ARCHIVE,    0, qtrue, qfalse},
+
+//  { &g_grapple,             "g_grapple",          "0", 0, 0, qtrue, qfalse },
+    { &g_wpflags,             "wpflags",            "0", 0, 0, qtrue, qfalse },
+    { &g_weaponlimit,         "weaponlimit",        "0", 0, 0, qtrue, qfalse },
+    { &g_doReady,             "g_doReady",          "0", 0, 0, qtrue, qfalse },
+    { &g_startArmor,          "g_startArmor",       "0", 0, 0, qtrue, qfalse },
+    { &g_votelimit,           "votelimit",          "0", 0, 0, qtrue, qfalse },
+//freeze
+
+
 
     //{ &g_rankings, "g_rankings", "0", 0, 0, qfalse},
     { &g_localTeamPref,       "g_localTeamPref",    "",  0,               0, qfalse, qfalse }
@@ -809,7 +833,9 @@ void CalculateRanks( void ) {
     }
 
     // see if it is time to end the level
-    CheckExitRules();
+    if ( ! g_freezetag.integer ) {
+        CheckExitRules();
+    }
 
     // if we are at the intermission, send the new info to everyone
     if ( level.intermissiontime ) {
@@ -1195,7 +1221,7 @@ static void CheckIntermissionExit( void ) {
     // only test ready status when there are real players present
     if ( playerCount > 0 ) {
         // if nobody wants to go, clear timer
-        if ( !ready ) {
+        if ( !ready && ( g_freezetag.integer && notReady ) ) {
             level.readyToExit = qfalse;
             return;
         }
@@ -1279,6 +1305,14 @@ void CheckExitRules( void ) {
         return;
     }
 
+
+//freeze
+    if ( g_freezetag.integer ) {
+        CheckDelay();
+    }
+//freeze
+
+
     // check for sudden death
     if ( ScoreIsTied() ) {
         // always wait for sudden death
@@ -1342,7 +1376,7 @@ void CheckExitRules( void ) {
         Cvar_Update( &g_capturelimit );
     }
 
-    if ( g_gametype.integer >= GT_CTF && g_capturelimit.integer ) {
+    if ( ( g_freezetag.integer && g_gametype.integer >= GT_TEAM ) || ( g_gametype.integer >= GT_CTF  && g_capturelimit.integer ) ) {
 
         if ( level.teamScores[TEAM_RED] >= g_capturelimit.integer ) {
             SV_GameSendServerCommand( -1, "print \"Red hit the capturelimit.\n\"" );
@@ -1445,6 +1479,13 @@ static void CheckTournament( void ) {
         } else if ( level.numPlayingClients < 2 ) {
             notEnough = qtrue;
         }
+
+
+//freeze
+        if ( g_freezetag.integer && !notEnough ) {
+            notEnough = readyCheck();
+        }
+//freeze
 
         if ( notEnough ) {
             if ( level.warmupTime != -1 ) {

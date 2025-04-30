@@ -199,6 +199,9 @@ struct gentity_s {
     int         historyHead;
     int         frameOffset;
     int         lastUpdateFrame;
+
+    qboolean    freezeState;
+    qboolean    readyBegin;
 };
 
 
@@ -249,6 +252,7 @@ typedef struct {
     int         spectatorClient;    // for chasecam and follow mode
     int         wins, losses;       // tournament stats
     qboolean    teamLeader;         // true when this client is a team leader
+    int         spectatorTime;      // added for g_freeze.c
 } clientSession_t;
 
 //
@@ -478,6 +482,9 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir );
 //
 // g_items.c
 //
+//freeze
+qboolean Registered( gitem_t *item );
+//freeze
 void G_CheckTeamItems( void );
 void G_RunItem( gentity_t *ent );
 void RespawnItem( gentity_t *ent );
@@ -735,7 +742,9 @@ int BotAIStartFrame( int time );
 void BotTestAAS(vec3_t origin);
 
 #include "g_team.h" // teamplay specific stuff
-
+//freeze
+#include "g_freeze.h"
+//freeze
 
 extern  level_locals_t  level;
 extern  gentity_t       g_entities[MAX_GENTITIES];
@@ -796,6 +805,18 @@ extern  vmCvar_t    g_localTeamPref;
 extern  vmCvar_t    g_damagePlums;
 
 extern  vmCvar_t        g_itemDrop;
+
+
+//freeze
+extern	vmCvar_t	g_grapple;
+extern	vmCvar_t	g_wpflags;
+extern	vmCvar_t	g_weaponlimit;
+extern	vmCvar_t	g_doReady;
+extern	vmCvar_t	g_startArmor;
+extern	vmCvar_t	g_votelimit;
+//freeze
+
+
 
 void Com_Error( int code, const char *fmt, ... ); // void    trap_Error( const char *text ) __attribute__((noreturn));
 int     trap_Milliseconds( void );

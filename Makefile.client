@@ -228,6 +228,7 @@ CGAMESRCFILES = \
  	$(CODE_DIR)/cgame/cg_effects.c \
  	$(CODE_DIR)/cgame/cg_ents.c \
  	$(CODE_DIR)/cgame/cg_event.c \
+ 	$(CODE_DIR)/cgame/cg_freeze.c \
  	$(CODE_DIR)/cgame/cg_info.c \
  	$(CODE_DIR)/cgame/cg_localents.c \
  	$(CODE_DIR)/cgame/cg_main.c \

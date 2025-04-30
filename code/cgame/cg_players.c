@@ -788,10 +788,19 @@ static void CG_SetDeferredClientInfo( int clientNum, clientInfo_t *ci ) {
             if ( !match->infoValid || match->deferred ) {
                 continue;
             }
-            if ( Q_stricmp( ci->skinName, match->skinName ) ||
-                (cgs.gametype >= GT_TEAM && ci->team != match->team) ) {
-                continue;
+
+            if ( ! cgs.g_freezetag ) {
+
+                if ( Q_stricmp( ci->skinName, match->skinName ) ||
+                    (cgs.gametype >= GT_TEAM && ci->team != match->team) ) {
+                    continue;
+                }
+            } else { //freeze
+                if ( ci->team != TEAM_SPECTATOR && ci->team != match->team ) {
+                    continue;
+                } //freeze
             }
+
             ci->deferred = qtrue;
             CG_CopyClientInfoModel( match, ci );
             return;
@@ -1878,6 +1887,14 @@ static void CG_PlayerFloatSprite( centity_t *cent, qhandle_t shader ) {
         rf = 0;
     }
 
+//freeze commented out at source  TODO revisit this TODO
+//	if ( shader == cgs.media.friendShader ) {
+//		rf |= RF_DEPTHHACK;
+//	}
+//freeze
+
+
+
     memset( &ent, 0, sizeof( ent ) );
 
     VectorCopy( cent->lerpOrigin, ent.origin );
@@ -2143,7 +2160,14 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, entityState_t *state, int te
             }
         }
         if ( state->powerups & ( 1 << PW_BATTLESUIT ) ) {
-            ent->customShader = cgs.media.battleSuitShader;
+
+//freeze
+			if ( cgs.g_freezetag && !state->weapon )
+				ent->customShader = cgs.media.freezeShader;
+			else
+//freeze
+                ent->customShader = cgs.media.battleSuitShader;
+
             RE_AddRefEntityToScene( ent );
         }
     }

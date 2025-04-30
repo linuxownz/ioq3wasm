@@ -579,4 +579,6 @@ void CG_InitConsoleCommands( void ) {
 	CL_AddCgameCommand ("stats");
 	CL_AddCgameCommand ("teamtask");
 	CL_AddCgameCommand ("loaddefered");	// spelled wrong, but not changing for demo
+    if ( cgs.g_freezetag )
+        CL_AddCgameCommand ("ready");
 }

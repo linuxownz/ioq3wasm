@@ -42,6 +42,8 @@ teamgame_t teamgame;
 
 gentity_t   *neutralObelisk;
 
+extern vmCvar_t g_freezetag;
+
 void Team_SetFlagStatus( int team, flagStatus_t status );
 
 void Team_InitGame( void ) {
@@ -244,7 +246,7 @@ void Team_CheckDroppedItem( gentity_t *dropped ) {
 Team_ForceGesture
 ================
 */
-static void Team_ForceGesture(int team) {
+void Team_ForceGesture(int team) {
     int i;
     gentity_t *ent;
 
@@ -730,6 +732,12 @@ static int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
     }
 #endif
 
+//freeze
+	if ( g_freezetag.integer && g_gametype.integer == GT_CTF ) {
+		team_wins( team );
+	}
+//freeze
+
     cl->ps.powerups[enemy_flag] = 0;
 
     teamgame.last_flag_capture = level.time;
@@ -906,6 +914,14 @@ gentity_t *Team_GetLocation(gentity_t *ent)
 
     best = NULL;
     bestlen = 3*8192.0*8192.0;
+
+
+//freeze
+	if ( g_freezetag.integer && ent->freezeState && is_body( ent->target_ent ) ) {
+		VectorCopy( ent->target_ent->r.currentOrigin, origin );
+	} else
+//freeze
+
 
     VectorCopy( ent->r.currentOrigin, origin );
 
@@ -1106,6 +1122,12 @@ void TeamplayInfoMessage( gentity_t *ent ) {
             if (h < 0) h = 0;
             if (a < 0) a = 0;
 
+//freeze
+			if ( g_freezetag.integer && player->freezeState ) {
+				h = a = 0;
+			}
+//freeze
+
             Com_sprintf (entry, sizeof(entry),
                 " %i %i %i %i %i %i",
 //              level.sortedClients[i], player->client->pers.teamState.location, h, a,
@@ -1167,15 +1189,23 @@ void CheckTeamStatus(void) {
 Only in CTF games.  Red players spawn here at game start.
 */
 void SP_team_CTF_redplayer( gentity_t *ent ) {
-    UNUSED(ent);
+//freeze
+	if ( g_freezetag.integer && g_gametype.integer == GT_TEAM ) {
+		ent->classname = "info_player_deathmatch";
+	}
+//freeze
 }
-
 
 /*QUAKED team_CTF_blueplayer (0 0 1) (-16 -16 -16) (16 16 32)
 Only in CTF games.  Blue players spawn here at game start.
 */
 void SP_team_CTF_blueplayer( gentity_t *ent ) {
-    UNUSED(ent);
+//freeze
+	if ( g_freezetag.integer && g_gametype.integer == GT_TEAM ) {
+		ent->classname = "info_player_deathmatch";
+	}
+//freeze
+
 }
 
 

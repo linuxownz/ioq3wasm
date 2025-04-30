@@ -49,7 +49,7 @@ int SV_PointContents( const vec3_t p, int passEntityNum );
 
 
 //======================================================================
-
+extern vmCvar_t g_freezetag;
 static int Pickup_Powerup( gentity_t *ent, gentity_t *other ) {
     int         quantity;
     int         i;
@@ -93,6 +93,11 @@ static int Pickup_Powerup( gentity_t *ent, gentity_t *other ) {
     if ( g_gametype.integer >= GT_TEAM && other->client->sess.sessionTeam == client->sess.sessionTeam  ) {
       continue;
     }
+
+//freeze
+        if ( g_freezetag.integer && is_spectator( other->client ) ) continue;
+//freeze
+
 
         // if too far away, no sound
         VectorSubtract( ent->s.pos.trBase, client->ps.origin, delta );
@@ -443,6 +448,12 @@ void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace) {
     if (other->health < 1)
         return;     // dead people can't pickup
 
+//freeze
+    if ( g_freezetag.integer && other->freezeState )
+        return;
+//freeze
+
+
     // the same pickup rules are used for client side and server side
     if ( !BG_CanItemBeGrabbed( g_gametype.integer, &ent->s, &other->client->ps ) ) {
         return;
@@ -450,7 +461,7 @@ void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace) {
 
     if (ent->dropTime && ent->dropTime + 500 > level.time) {
         return;
-	}
+    }
 
     G_LogPrintf( "Item: %i %s\n", other->s.number, ent->item->classname );
 
@@ -568,6 +579,13 @@ void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace) {
         ent->think = 0;
     } else {
         ent->nextthink = level.time + respawn * 1000;
+
+//freeze
+        if ( g_freezetag.integer && ent->item->giType == IT_WEAPON && g_dmflags.integer & 256 && !ent->freeAfterEvent ) {
+            ent->nextthink = level.time;
+        }
+//freeze
+
         ent->think = RespawnItem;
     }
     SV_LinkEntity( ent );
@@ -656,27 +674,27 @@ Spawns an item and tosses it forward
 */
 gentity_t *Drop_ItemNonRandom( gentity_t *ent, gitem_t *item, float angle ) {
     UNUSED(angle);
-	vec3_t forward, right, up;
-	vec3_t muzzle;
-	gentity_t *item_ent;
-	if (!ent->client) {
-		return NULL;
-	}
-	AngleVectors (ent->client->ps.viewangles, forward, right, up );
-	CalcMuzzlePoint ( ent, forward, right, up, muzzle );
-	forward[2] += 0.2f;
-	VectorNormalize(forward);
-	VectorScale( forward, 350, forward );
-	// add player inertia
-	//VectorAdd(forward, ent->client->ps.velocity, forward);
+    vec3_t forward, right, up;
+    vec3_t muzzle;
+    gentity_t *item_ent;
+    if (!ent->client) {
+        return NULL;
+    }
+    AngleVectors (ent->client->ps.viewangles, forward, right, up );
+    CalcMuzzlePoint ( ent, forward, right, up, muzzle );
+    forward[2] += 0.2f;
+    VectorNormalize(forward);
+    VectorScale( forward, 350, forward );
+    // add player inertia
+    //VectorAdd(forward, ent->client->ps.velocity, forward);
 
-	//velocity[2] += 250;
+    //velocity[2] += 250;
 
-	item_ent = LaunchItem( item, muzzle, forward );
-	if (item_ent && ent->client) {
-		//item_ent->s.pos.trTime -= G_MissilePrestep(ent->client);
-	}
-	return item_ent;
+    item_ent = LaunchItem( item, muzzle, forward );
+    if (item_ent && ent->client) {
+        //item_ent->s.pos.trTime -= G_MissilePrestep(ent->client);
+    }
+    return item_ent;
 }
 
 
@@ -712,6 +730,13 @@ void FinishSpawningItem( gentity_t *ent ) {
     ent->s.eType = ET_ITEM;
     ent->s.modelindex = ent->item - bg_itemlist;        // store item number in modelindex
     ent->s.modelindex2 = 0; // zero indicates this isn't a dropped item
+
+//freeze
+    if ( g_freezetag.integer && g_dmflags.integer & 256 ) {
+        ent->s.modelindex2 = 255;
+    }
+//freeze
+
 
     ent->r.contents = CONTENTS_TRIGGER;
     ent->touch = Touch_Item;
@@ -764,6 +789,11 @@ void FinishSpawningItem( gentity_t *ent ) {
 
 static qboolean    itemRegistered[MAX_ITEMS];
 
+//freeze
+qboolean Registered( gitem_t *item ) {
+    return ( item && itemRegistered[ item - bg_itemlist ] );
+}
+//freeze
 /*
 ==================
 G_CheckTeamItems
@@ -869,6 +899,12 @@ void ClearRegisteredItems( void ) {
         RegisterItem( BG_FindItem( "Blue Cube" ) );
     }
 #endif
+
+//freeze
+    if ( g_freezetag.integer) {
+        RegisterWeapon();
+    }
+//freeze
 }
 
 /*
@@ -919,7 +955,7 @@ void SaveRegisteredItems( void ) {
 G_ItemDisabled
 ============
 */
-static int G_ItemDisabled( gitem_t *item ) {
+int G_ItemDisabled( gitem_t *item ) {
 
     char name[128];
 
@@ -939,44 +975,44 @@ be on an entity that hasn't spawned yet.
 */
 void G_SpawnItemInstagib(gentity_t* ent, gitem_t* item) {
 
-	if (item->giType != IT_TEAM)
-	{
+    if (item->giType != IT_TEAM)
+    {
 
-		G_SpawnFloat("random", "0", &ent->random);
-		G_SpawnFloat("wait", "0", &ent->wait);
+        G_SpawnFloat("random", "0", &ent->random);
+        G_SpawnFloat("wait", "0", &ent->wait);
 
-		//OERUM
-		//If it's a team item then we want to spwan it. Otherwise make it invisible.
-		if (item->giType == IT_TEAM) {
-			RegisterItem(item);
-			if (G_ItemDisabled(item))
-				return;
-		}
-		else {
-			//Ahh what does this do then
-			ent->r.svFlags = SVF_NOCLIENT;
-			//setting this flag makes the item invisible.
-			ent->s.eFlags |= EF_NODRAW;
-		}
+        //OERUM
+        //If it's a team item then we want to spwan it. Otherwise make it invisible.
+        if (item->giType == IT_TEAM) {
+            RegisterItem(item);
+            if (G_ItemDisabled(item))
+                return;
+        }
+        else {
+            //Ahh what does this do then
+            ent->r.svFlags = SVF_NOCLIENT;
+            //setting this flag makes the item invisible.
+            ent->s.eFlags |= EF_NODRAW;
+        }
 
-		ent->item = item; // some movers spawn on the second frame, so delay item
-					      // spawns until the third frame so they can ride trains
-		ent->nextthink = level.time + FRAMETIME * 2;
-		ent->think = FinishSpawningItem;
+        ent->item = item; // some movers spawn on the second frame, so delay item
+                          // spawns until the third frame so they can ride trains
+        ent->nextthink = level.time + FRAMETIME * 2;
+        ent->think = FinishSpawningItem;
 
-		ent->physicsBounce = 0.50;         // items are bouncy
-		ent->s.eFlags |= EF_NODRAW;
+        ent->physicsBounce = 0.50;         // items are bouncy
+        ent->s.eFlags |= EF_NODRAW;
 
-		if (item->giType == IT_POWERUP) {
-			G_SoundIndex("sound/items/poweruprespawn.wav");
-			G_SpawnFloat("noglobalsound", "0", &ent->speed);
-		}
-	}
+        if (item->giType == IT_POWERUP) {
+            G_SoundIndex("sound/items/poweruprespawn.wav");
+            G_SpawnFloat("noglobalsound", "0", &ent->speed);
+        }
+    }
 
 #ifdef MISSIONPACK
-	if (item->giType == IT_PERSISTANT_POWERUP) {
-		ent->s.generic1 = ent->spawnflags;
-	}
+    if (item->giType == IT_PERSISTANT_POWERUP) {
+        ent->s.generic1 = ent->spawnflags;
+    }
 #endif
 }
 
@@ -1041,6 +1077,15 @@ static void G_BounceItem( gentity_t *ent, trace_t *trace ) {
         SnapVector( trace->endpos );
         G_SetOrigin( ent, trace->endpos );
         ent->s.groundEntityNum = trace->entityNum;
+
+//freeze
+        if ( g_freezetag.integer && ent->pain_debounce_time < level.time - 700 ) {
+            ent->pain_debounce_time = level.time;
+            G_AddEvent( ent, EV_FALL_SHORT, 0 );
+        }
+//freeze
+
+
         return;
     }
 
@@ -1085,7 +1130,14 @@ void G_RunItem( gentity_t *ent ) {
     } else {
         mask = MASK_PLAYERSOLID & ~CONTENTS_BODY;//MASK_SOLID;
     }
-    SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ent->r.ownerNum, mask, qfalse );
+
+//freeze
+	if ( g_freezetag.integer && is_body_freeze( ent ) )
+		SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ent->s.number, mask, qfalse );
+	else
+//freeze
+
+        SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ent->r.ownerNum, mask, qfalse );
 
     VectorCopy( tr.endpos, ent->r.currentOrigin );
 
@@ -1108,6 +1160,17 @@ void G_RunItem( gentity_t *ent ) {
         if (ent->item && ent->item->giType == IT_TEAM) {
             Team_FreeEntity(ent);
         } else {
+
+
+//freeze
+			if ( g_freezetag.integer && is_body( ent ) ) {
+				if ( level.time - ent->timestamp > 10000 ) {
+					Body_free( ent );
+				}
+				return;
+			}
+//freeze
+
             G_FreeEntity( ent );
         }
         return;

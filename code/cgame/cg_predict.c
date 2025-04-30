@@ -923,6 +923,13 @@ void CG_PredictPlayerState( void ) {
     }
     else {
         cg_pmove.tracemask = MASK_PLAYERSOLID;
+
+//freeze
+		if ( cgs.g_freezetag && cgs.dmflags & 512 ) {
+			cg_pmove.tracemask &= ~CONTENTS_PLAYERCLIP;
+		}
+//freeze
+
     }
     if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR ) {
         cg_pmove.tracemask &= ~CONTENTS_BODY;   // spectators can fly through bodies
