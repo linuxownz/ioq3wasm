@@ -95,7 +95,9 @@ static int Pickup_Powerup( gentity_t *ent, gentity_t *other ) {
     }
 
 //freeze
-        if ( g_freezetag.integer && is_spectator( other->client ) ) continue;
+        if ( g_freezetag.integer && is_spectator( other->client ) ) {
+            continue;
+        }
 //freeze
 
 
@@ -794,6 +796,7 @@ qboolean Registered( gitem_t *item ) {
     return ( item && itemRegistered[ item - bg_itemlist ] );
 }
 //freeze
+
 /*
 ==================
 G_CheckTeamItems
@@ -1132,11 +1135,10 @@ void G_RunItem( gentity_t *ent ) {
     }
 
 //freeze
-	if ( g_freezetag.integer && is_body_freeze( ent ) )
-		SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ent->s.number, mask, qfalse );
-	else
+    if ( g_freezetag.integer && is_body_freeze( ent ) )
+        SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ent->s.number, mask, qfalse );
+    else
 //freeze
-
         SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ent->r.ownerNum, mask, qfalse );
 
     VectorCopy( tr.endpos, ent->r.currentOrigin );
@@ -1163,12 +1165,12 @@ void G_RunItem( gentity_t *ent ) {
 
 
 //freeze
-			if ( g_freezetag.integer && is_body( ent ) ) {
-				if ( level.time - ent->timestamp > 10000 ) {
-					Body_free( ent );
-				}
-				return;
-			}
+            if ( g_freezetag.integer && is_body( ent ) ) {
+                if ( level.time - ent->timestamp > 10000 ) {
+                    Body_free( ent ); // TODO is this where client is free'd from being attached to corpse??
+                }
+                return;
+            }
 //freeze
 
             G_FreeEntity( ent );

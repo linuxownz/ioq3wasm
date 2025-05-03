@@ -925,7 +925,7 @@ void CG_PredictPlayerState( void ) {
         cg_pmove.tracemask = MASK_PLAYERSOLID;
 
 //freeze
-		if ( cgs.g_freezetag && cgs.dmflags & 512 ) {
+		if ( cgs.g_freezetag && cgs.dmflags & 512 ) { // DF_NO_PLAYERCLIP
 			cg_pmove.tracemask &= ~CONTENTS_PLAYERCLIP;
 		}
 //freeze

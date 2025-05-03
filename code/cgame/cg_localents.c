@@ -272,18 +272,18 @@ void CG_AddFragment( localEntity_t *le ) {
 			le->refEntity.origin[2] -= 16 * ( 1.0 - (float)t / SINK_TIME );
 
 //freeze
-            // cg_freezetag will be a CVARGETfromserverinfo ...
-			if ( cgs.g_freezetag )
+			if ( cgs.g_freezetag ) {
                 CG_AddGib( le );
+            }
 //freeze
-
 
 			RE_AddRefEntityToScene( &le->refEntity );
 			le->refEntity.origin[2] = oldZ;
 		} else {
 //freeze
-			if ( cgs.g_freezetag )
+			if ( cgs.g_freezetag ) {
                 CG_AddGib( le );
+            }
 //freeze
 
 			RE_AddRefEntityToScene( &le->refEntity );
@@ -308,11 +308,11 @@ void CG_AddFragment( localEntity_t *le ) {
 			AnglesToAxis( angles, le->refEntity.axis );
 		}
 
-        //freeze
+//freeze
         if ( cgs.g_freezetag ) {
             CG_AddGib( le );
         }
-        //freeze
+//freeze
 
 		RE_AddRefEntityToScene( &le->refEntity );
 
@@ -342,7 +342,9 @@ void CG_AddFragment( localEntity_t *le ) {
 	CG_ReflectVelocity( le, &trace );
 
 //freeze
-	if ( cgs.g_freezetag ) CG_AddGib( le );
+	if ( cgs.g_freezetag ) {
+        CG_AddGib( le );
+    }
 //freeze
 
 	RE_AddRefEntityToScene( &le->refEntity );

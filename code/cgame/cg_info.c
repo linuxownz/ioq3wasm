@@ -280,7 +280,7 @@ void CG_DrawInformation( void ) {
         y += PROP_HEIGHT;
     }
 
-    if (cgs.gametype < GT_CTF ) {
+    if (cgs.gametype < GT_CTF || ( cgs.g_freezetag && cgs.gametype < GT_TEAM )) {
         value = atoi( Info_ValueForKey( info, "fraglimit" ) );
         if ( value ) {
             UI_DrawProportionalString( 320, y, va( "fraglimit %i", value ), UI_CENTER|UI_SMALLFONT|UI_DROPSHADOW, colorWhite );
@@ -289,7 +289,7 @@ void CG_DrawInformation( void ) {
         }
     }
 
-    if (cgs.gametype >= GT_CTF) {
+    if (cgs.gametype >= GT_CTF || (cgs.g_freezetag && cgs.gametype >= GT_TEAM)) {
         value = atoi( Info_ValueForKey( info, "capturelimit" ) );
         if ( value ) {
             //Com_Printf("capture limit: %i\n", value);

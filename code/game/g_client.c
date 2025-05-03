@@ -544,14 +544,15 @@ void ClientRespawn( gentity_t *ent ) {
 
     //freeze
     if ( g_freezetag.integer ) {
-	    if ( Set_spectator( ent ) ) return;
+	    if ( Set_spectator( ent ) )
+            return;
     }
     //freeze
 
     CopyToBodyQue (ent);
     ClientSpawn(ent);
 
-    // TEST this was added from freeze but no part of freeze TODO test
+    // TEST this was added from freeze but not part of freeze TODO test
 	// add a teleportation effect
 	gentity_t * tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_IN );
 	tent->s.clientNum = ent->s.clientNum;
@@ -1150,7 +1151,6 @@ void ClientSpawn(gentity_t *ent) {
     flags = ent->client->ps.eFlags & (EF_TELEPORT_BIT | EF_VOTED | EF_TEAMVOTED);
     flags ^= EF_TELEPORT_BIT;
 
-
     G_ResetHistory( ent );
 	client->saved.leveltime = 0;
 
@@ -1242,6 +1242,11 @@ void ClientSpawn(gentity_t *ent) {
 
     SV_GetUsercmd( client - level.clients, &ent->client->pers.cmd );
     SetClientViewAngle( ent, spawn_angles );
+
+
+//freeze THIS block is now lower freeze
+
+
     // don't allow full run speed for a bit
     client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
     client->ps.pm_time = 100;
@@ -1255,16 +1260,16 @@ void ClientSpawn(gentity_t *ent) {
     client->ps.legsAnim = LEGS_IDLE;
 
     if (!level.intermissiontime) {
-        if (! is_spectator(ent->client) /*ent->client->sess.sessionTeam != TEAM_SPECTATOR*/) {
+        if ( ( g_freezetag.integer && ! is_spectator(ent->client) ) || ent->client->sess.sessionTeam != TEAM_SPECTATOR) {
             G_KillBox(ent);
             // force the base weapon up
             client->ps.weapon = WP_MACHINEGUN;
             client->ps.weaponstate = WEAPON_READY;
-            // fire the targets of the spawn point
 
 //freeze
-            if ( ! g_freezetag.integer || !( g_dmflags.integer & 1024 ) )
+            if ( !g_freezetag.integer || !( g_dmflags.integer & DF_NOFIREOFFSPAWN ) )
 //freeze
+            // fire the targets off the spawn point
                 G_UseTargets(spawnPoint, ent);
 
             // select the highest weapon number available, after any spawn given items have fired
@@ -1276,22 +1281,20 @@ void ClientSpawn(gentity_t *ent) {
                     break;
                 }
             }
-
 //freeze
-        if ( g_freezetag.integer ) {
-            if ( client->ps.stats[ STAT_WEAPONS ] & ( 1 << WP_ROCKET_LAUNCHER ) ) {
-                client->ps.weapon = WP_ROCKET_LAUNCHER;
-            }
+            if ( g_freezetag.integer ) {
+                if ( client->ps.stats[ STAT_WEAPONS ] & ( 1 << WP_ROCKET_LAUNCHER ) ) {
+                    client->ps.weapon = WP_ROCKET_LAUNCHER;
+                }
 
-            if ( g_startArmor.integer > 0 ) {
-                client->ps.stats[ STAT_ARMOR ] += g_startArmor.integer;
-                if ( client->ps.stats[ STAT_ARMOR ] > client->ps.stats[ STAT_MAX_HEALTH ] * 2 ) {
-                    client->ps.stats[ STAT_ARMOR ] = client->ps.stats[ STAT_MAX_HEALTH ] * 2;
+                if ( g_startArmor.integer > 0 ) {
+                    client->ps.stats[ STAT_ARMOR ] += g_startArmor.integer;
+                    if ( client->ps.stats[ STAT_ARMOR ] > client->ps.stats[ STAT_MAX_HEALTH ] * 2 ) {
+                        client->ps.stats[ STAT_ARMOR ] = client->ps.stats[ STAT_MAX_HEALTH ] * 2;
+                    }
                 }
             }
-        }
 //freeze
-
 
             // positively link the client, even if the command times are weird
             VectorCopy(ent->client->ps.origin, ent->r.currentOrigin);
@@ -1316,6 +1319,14 @@ void ClientSpawn(gentity_t *ent) {
     client->ps.commandTime = level.time - 100;
     ent->client->pers.cmd.serverTime = level.time;
     ClientThink( ent-g_entities );
+
+    if ( g_freezetag.integer && ! is_spectator(client) ) {
+		BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
+		VectorCopy( ent->client->ps.origin, ent->r.currentOrigin );
+		SV_LinkEntity( ent );
+    }
+
+
     // run the presend to set anything else, follow spectators wait
     // until all clients have been reconnected after map_restart
     if ( ent->client->sess.spectatorState != SPECTATOR_FOLLOW ) {
@@ -1355,14 +1366,20 @@ void ClientDisconnect( int clientNum ) {
 
     // stop any following clients
     for ( i = 0 ; i < level.maxclients ; i++ ) {
-        //if ( level.clients[i].sess.sessionTeam == TEAM_SPECTATOR && level.clients[i].sess.spectatorState == SPECTATOR_FOLLOW && level.clients[i].sess.spectatorClient == clientNum )
-        if ( is_spectator( &level.clients[i] ) ) {
+        if (
+        ( ! g_freezetag.integer &&
+            level.clients[i].sess.sessionTeam    == TEAM_SPECTATOR &&
+            level.clients[i].sess.spectatorState == SPECTATOR_FOLLOW &&
+            level.clients[i].sess.spectatorClient == clientNum
+        )
+        ||
+        (   g_freezetag.integer && is_spectator( &level.clients[i] ) ) ) {
             StopFollowing( &g_entities[i] );
         }
     }
 
     // send effect if they were completely connected
-    if ( ent->client->pers.connected == CON_CONNECTED && ! is_spectator(ent->client) /*ent->client->sess.sessionTeam != TEAM_SPECTATOR*/ ) {
+    if ( ( ent->client->pers.connected == CON_CONNECTED && ( g_freezetag.integer && !is_spectator(ent->client) ) ) || ( !g_freezetag.integer && ent->client->sess.sessionTeam != TEAM_SPECTATOR ) ) {
         tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_OUT );
         tent->s.clientNum = ent->s.clientNum;
 

@@ -443,6 +443,7 @@ static void CG_Camera_f( void ) {
 }
 */
 
+void CG_Drop_freeze_f( void );
 
 typedef struct {
 	char	*cmd;
@@ -497,6 +498,7 @@ static consoleCommand_t	commands[] = {
 	{ "scoresDown", CG_scrollScoresDown_f },
 	{ "scoresUp", CG_scrollScoresUp_f },
 #endif
+	//{ "drop", CG_Drop_freeze_f }, // There are two drops function, second from freezetag source
 	{ "startOrbit", CG_StartOrbit_f },
 	//{ "camera", CG_Camera_f },
 	{ "loaddeferred", CG_LoadDeferredPlayers }

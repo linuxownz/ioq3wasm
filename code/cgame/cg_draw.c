@@ -421,7 +421,7 @@ void CG_DrawHead( float x, float y, float w, float h, int clientNum, vec3_t head
     }
 //freeze
     else if ( cgs.g_freezetag && Q_Isfreeze( clientNum ) ) {
-		CG_DrawPic( x, y, w, h, cgs.media.noammoShader );
+        CG_DrawPic( x, y, w, h, cgs.media.noammoShader );
     }
 //freeze
 }
@@ -1050,6 +1050,15 @@ static float CG_DrawTeamOverlay( float y, qboolean right, qboolean upper ) {
                 xx = x + w - TINYCHAR_WIDTH;
             }
             for (j = 0; j <= PW_NUM_POWERUPS; j++) {
+
+//freeze
+                if ( Q_Isfreeze( ci - cgs.clientinfo ) ) {
+                    CG_DrawPic( xx, y, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, cgs.media.noammoShader );
+                    break;
+                }
+//freeze
+
+
                 if (ci->powerups & (1 << j)) {
 
                     item = BG_FindItemForPowerup( j );
@@ -1191,7 +1200,7 @@ static float CG_DrawScores( float y ) {
             }
         }
 
-        if ( cgs.gametype >= GT_CTF ) {
+        if ( ( ! cgs.g_freezetag && cgs.gametype >= GT_CTF ) || cgs.gametype >= GT_TEAM ) {
             v = cgs.capturelimit;
         } else {
             v = cgs.fraglimit;
@@ -2147,6 +2156,19 @@ static void CG_ScanForCrosshairEntity( void ) {
     CG_Trace( &trace, start, vec3_origin, vec3_origin, end,
         cg.snap->ps.clientNum, CONTENTS_SOLID|CONTENTS_BODY );
     if ( trace.entityNum >= MAX_CLIENTS ) {
+
+//freeze
+        if ( cgs.g_freezetag ) {
+            entityState_t   *es;
+
+            es = &cg_entities[ trace.entityNum ].currentState;
+            if ( es->powerups & ( 1 << PW_BATTLESUIT ) ) {
+                cg.crosshairClientNum = es->otherEntityNum;
+                cg.crosshairClientTime = cg.time;
+            }
+        }
+//freeze
+
         return;
     }
 
@@ -2219,11 +2241,11 @@ CG_DrawSpectator
 */
 static void CG_DrawSpectator(void) {
     CG_DrawBigString(320 - 9 * 8, 440, "SPECTATOR", 1.0F);
-    if ( cgs.gametype == GT_TOURNAMENT ) {
+    if ( cgs.gametype == GT_TOURNAMENT || ( cgs.g_freezetag && Q_Isfreeze(cg.snap->ps.clientNum ) ) ) {
         CG_DrawBigString(320 - 15 * 8, 460, "waiting to play", 1.0F);
     }
     else if ( cgs.gametype >= GT_TEAM ) {
-        CG_DrawSmallString(100, 460, "To play, press tilde and type \\team red or \\team blue", 0.5F);
+        CG_DrawSmallString(100, 460, "To play, press ESC twice and click team red or team blue", 0.5F);
     }
 }
 

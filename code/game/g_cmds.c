@@ -80,6 +80,12 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
         }
         perfect = ( cl->ps.persistant[PERS_RANK] == 0 && cl->ps.persistant[PERS_KILLED] == 0 ) ? 1 : 0;
 
+//freeze
+        if ( g_freezetag.integer ) {
+            scoreFlags = cl->sess.wins;
+        }
+//freeze
+
         Com_sprintf (entry, sizeof(entry),
             " %i %i %i %i %i %i %i %i %i %i %i %i %i %i", level.sortedClients[i],
             cl->ps.persistant[PERS_SCORE], ping, (level.time - cl->pers.enterTime)/60000,
@@ -481,7 +487,9 @@ Cmd_Kill_f
 =================
 */
 static void Cmd_Kill_f( gentity_t *ent ) {
+//freeze
     if ( is_spectator(ent->client) /*ent->client->sess.sessionTeam == TEAM_SPECTATOR*/ ) {
+//freeze
         return;
     }
     if (ent->health <= 0) {
@@ -489,11 +497,13 @@ static void Cmd_Kill_f( gentity_t *ent ) {
     }
     ent->flags &= ~FL_GODMODE;
     ent->client->ps.stats[STAT_HEALTH] = ent->health = -999;
+//freeze
     if ( ! g_freezetag.integer ) {
         player_die (ent, ent, ent, 100000, MOD_SUICIDE);
     } else {
         player_die (ent, ent, ent, 100000, MOD_BFG_SPLASH); // ??
     }
+//freeze
 }
 
 /*
@@ -673,7 +683,9 @@ to free floating spectator mode
 */
 void StopFollowing( gentity_t *ent ) {
     ent->client->ps.persistant[ PERS_TEAM ] = TEAM_SPECTATOR;
-    ent->client->sess.sessionTeam = TEAM_SPECTATOR;
+    if ( !g_freezetag.integer ) {
+        ent->client->sess.sessionTeam = TEAM_SPECTATOR;
+    }
     ent->client->sess.spectatorState = SPECTATOR_FREE;
     ent->client->ps.pm_flags &= ~PMF_FOLLOW;
     ent->r.svFlags &= ~SVF_BOT;
@@ -863,8 +875,6 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
         }
 
         // can't follow another spectator
-
-
 //freeze
         if ( g_freezetag.integer ) {
             if ( &level.clients[ clientnum ] == ent->client ) {
@@ -1895,7 +1905,7 @@ void ClientCommand( int clientNum ) {
         }
     }
     else if ( Q_stricmp( cmd, "ready" ) == 0 )
-		Cmd_Ready_f( ent ); //defined in g_freeze.c
+        Cmd_Ready_f( ent ); //defined in g_freeze.c
     else
         SV_GameSendServerCommand( clientNum, va("print \"unknown cmd %s\n\"", cmd ) );
 }

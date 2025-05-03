@@ -153,14 +153,12 @@ static void CG_Obituary( entityState_t *ent ) {
         break;
     }
 
-
 //freeze
     if ( cgs.g_freezetag && mod == MOD_UNKNOWN ) {
         CG_BodyObituary( ent, targetName );
         return;
     }
 //freeze
-
 
     if (attacker == target) {
         gender = ci->gender;

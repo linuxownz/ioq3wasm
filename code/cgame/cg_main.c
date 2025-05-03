@@ -251,8 +251,8 @@ static cvarTable_t cvarTable[] = {
     { &cg_tracerChance, "cg_tracerchance", "0.4", CVAR_CHEAT },
     { &cg_tracerWidth, "cg_tracerwidth", "1", CVAR_CHEAT },
     { &cg_tracerLength, "cg_tracerlength", "100", CVAR_CHEAT },
-    { &cg_thirdPersonRange, "cg_thirdPersonRange", "40", CVAR_CHEAT },
-    { &cg_thirdPersonAngle, "cg_thirdPersonAngle", "0", CVAR_CHEAT },
+    { &cg_thirdPersonRange, "cg_thirdPersonRange", "40", 0 /*CVAR_CHEAT*/ }, // freeze turned of cheat
+    { &cg_thirdPersonAngle, "cg_thirdPersonAngle", "0", 0  /*CVAR_CHEAT*/ },
     { &cg_thirdPerson, "cg_thirdPerson", "0", 0 },
     { &cg_teamChatTime, "cg_teamChatTime", "3000", CVAR_ARCHIVE  },
     { &cg_teamChatHeight, "cg_teamChatHeight", "0", CVAR_ARCHIVE  },
@@ -605,7 +605,7 @@ called during a precache command
 */
 static void CG_RegisterSounds( void ) {
     char    items[MAX_ITEMS+1];
-    char    name[MAX_QPATH];
+    //char    name[MAX_QPATH];
 
     // voice commands
 #ifdef MISSIONPACK
@@ -984,7 +984,6 @@ static void CG_RegisterGraphics2(void) {
     cgs.media.hastePuffShader    = RE_RegisterShader("hasteSmokePuff" );
 
 //freeze
-// TODO don't forget to add these shaders
 	cgs.media.freezeShader     = RE_RegisterShader( "freezeShader" );
 	cgs.media.freezeMarkShader = RE_RegisterShader( "freezeMarkShader" );
 //freeze
@@ -1740,7 +1739,7 @@ static const char *CG_FeederItemText(float feederID, int index, int column, qhan
                 } else {
 
 //freeze
-					if ( cg_freezetag.integer && Q_Isfreeze( sp->client ) )
+					if ( cgs.g_freezetag && Q_Isfreeze( sp->client ) )
 						*handle = cgs.media.noammoShader;
 					else
 //freeze
@@ -1749,12 +1748,9 @@ static const char *CG_FeederItemText(float feederID, int index, int column, qhan
           break;
             case 2:
                 if ( cg.snap->ps.stats[ STAT_CLIENTS_READY ] & ( 1 << sp->client ) ) {
-
-
 //freeze
-					if ( ! cg_freezetag.integer || !Q_Isfreeze( sp->client ) )
+					if ( ! cgs.g_freezetag || !Q_Isfreeze( sp->client ) )
 //freeze
-
                     return "Ready";
                 }
                 if (team == -1) {
@@ -1766,6 +1762,14 @@ static const char *CG_FeederItemText(float feederID, int index, int column, qhan
                         return "";
                     }
                 } else {
+
+//freeze
+					if ( cgs.g_freezetag && ( cgs.gametype == GT_TEAM || cgs.gametype == GT_CTF ) ) {
+						return va( "%i %s", sp->scoreFlags, info->teamLeader ? "L" : "" );
+					}
+//freeze
+
+
                     if (info->teamLeader) {
                         return "Leader";
                     }

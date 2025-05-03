@@ -207,7 +207,7 @@ static cvarTable_t gameCvarTable[] = {
 
 
     //freeze
-    { &g_freezetag,           "g_freezetag",        "0", CVAR_SERVERINFO | CVAR_ARCHIVE,    0, qtrue, qfalse},
+    { &g_freezetag,           "g_freezetag",        "1", CVAR_SERVERINFO | CVAR_ARCHIVE,    0, qtrue, qfalse},
 
 //  { &g_grapple,             "g_grapple",          "0", 0, 0, qtrue, qfalse },
     { &g_wpflags,             "wpflags",            "0", 0, 0, qtrue, qfalse },
@@ -1213,8 +1213,8 @@ static void CheckIntermissionExit( void ) {
         cl->ps.stats[STAT_CLIENTS_READY] = readyMask;
     }
 
-    // never exit in less than five seconds
-    if ( level.time < level.intermissiontime + 5000 ) {
+    // never exit in less than ten seconds
+    if ( level.time < level.intermissiontime + 10000 ) {
         return;
     }
 
@@ -1376,7 +1376,7 @@ void CheckExitRules( void ) {
         Cvar_Update( &g_capturelimit );
     }
 
-    if ( ( g_freezetag.integer && g_gametype.integer >= GT_TEAM ) || ( g_gametype.integer >= GT_CTF  && g_capturelimit.integer ) ) {
+    if ( ( g_freezetag.integer && g_gametype.integer >= GT_TEAM ) || ( g_gametype.integer >= GT_CTF && g_capturelimit.integer ) ) {
 
         if ( level.teamScores[TEAM_RED] >= g_capturelimit.integer ) {
             SV_GameSendServerCommand( -1, "print \"Red hit the capturelimit.\n\"" );

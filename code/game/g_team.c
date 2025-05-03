@@ -921,9 +921,7 @@ gentity_t *Team_GetLocation(gentity_t *ent)
 		VectorCopy( ent->target_ent->r.currentOrigin, origin );
 	} else
 //freeze
-
-
-    VectorCopy( ent->r.currentOrigin, origin );
+        VectorCopy( ent->r.currentOrigin, origin );
 
     for (eloc = level.locationHead; eloc; eloc = eloc->nextTrain) {
         len = ( origin[0] - eloc->r.currentOrigin[0] ) * ( origin[0] - eloc->r.currentOrigin[0] )

@@ -1888,9 +1888,9 @@ static void CG_PlayerFloatSprite( centity_t *cent, qhandle_t shader ) {
     }
 
 //freeze commented out at source  TODO revisit this TODO
-//	if ( shader == cgs.media.friendShader ) {
-//		rf |= RF_DEPTHHACK;
-//	}
+    if ( shader == cgs.media.friendShader ) {
+        rf |= RF_DEPTHHACK;
+    }
 //freeze
 
 

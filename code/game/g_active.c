@@ -32,6 +32,7 @@ void SV_GetUsercmd( int clientNum, usercmd_t *cmd );
 int SV_PointContents( const vec3_t p, int passEntityNum );
 int Sys_Milliseconds(void);
 
+extern vmCvar_t g_freezetag;
 /*
 ===============
 G_DamageFeedback
@@ -277,8 +278,10 @@ void    G_TouchTriggers( gentity_t *ent ) {
             continue;
         }
 
+//freeze
         // ignore most entities if a spectator
-        if ( is_spectator( ent->client ) /*ent->client->sess.sessionTeam == TEAM_SPECTATOR*/ ) {
+        if ( ( g_freezetag.integer && is_spectator( ent->client ) ) || ent->client->sess.sessionTeam == TEAM_SPECTATOR ) {
+//freeze
             if ( hit->s.eType != ET_TELEPORT_TRIGGER &&
                 // this is ugly but adding a new ET_? type will
                 // most likely cause network incompatibilities
@@ -322,7 +325,6 @@ void    G_TouchTriggers( gentity_t *ent ) {
 SpectatorThink
 =================
 */
-extern vmCvar_t g_freezetag;
 static void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
     pmove_t pm;
     gclient_t   *client;
@@ -349,7 +351,7 @@ static void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
         pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;   // spectators can fly through bodies
 
 //freeze
-		if ( g_freezetag.integer && g_dmflags.integer & 512 ) {
+		if ( g_freezetag.integer && g_dmflags.integer & DF_NO_PLAYERCLIP ) {
 			pm.tracemask &= ~CONTENTS_PLAYERCLIP;
 		}
 //freeze
@@ -363,12 +365,13 @@ static void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
         VectorCopy( client->ps.origin, ent->s.origin );
 
         G_TouchTriggers( ent );
-        SV_UnlinkEntity( ( sharedEntity_t *)ent ); // TODO is this right?
+        SV_UnlinkEntity( ( sharedEntity_t *)ent );
     }
 
     client->oldbuttons = client->buttons;
     client->buttons = ucmd->buttons;
 
+    // TODO is this correct for freezetag?? TODO
     // attack button cycles through spectators
     if ( ( client->buttons & BUTTON_ATTACK ) && ! ( client->oldbuttons & BUTTON_ATTACK ) ) {
         Cmd_FollowCycle_f( ent, 1 );
@@ -846,7 +849,7 @@ static void ClientThink_real( gentity_t *ent ) {
     }
 
     // spectators don't do much
-    if ( is_spectator(client) /*client->sess.sessionTeam == TEAM_SPECTATOR*/ ) {
+    if ( ( g_freezetag.integer && is_spectator(client) ) || client->sess.sessionTeam == TEAM_SPECTATOR ) {
         if ( client->sess.spectatorState == SPECTATOR_SCOREBOARD ) {
             return;
         }
@@ -954,7 +957,7 @@ static void ClientThink_real( gentity_t *ent ) {
     else {
         pm.tracemask = MASK_PLAYERSOLID;
 //freeze
-		if ( g_freezetag.integer && g_dmflags.integer & 512 ) {
+		if ( g_freezetag.integer && g_dmflags.integer & DF_NO_PLAYERCLIP ) {
 			pm.tracemask &= ~CONTENTS_PLAYERCLIP;
 		}
 //freeze
@@ -1121,7 +1124,7 @@ static void SpectatorClientEndFrame( gentity_t *ent ) {
 
         if ( clientNum >= 0 ) {
             cl = &level.clients[ clientNum ];
-            if ( cl->pers.connected == CON_CONNECTED && !is_spectator( cl ) /*cl->sess.sessionTeam != TEAM_SPECTATOR*/ ) {
+            if ( cl->pers.connected == CON_CONNECTED && ( ( g_freezetag.integer && !is_spectator( cl ) ) || cl->sess.sessionTeam != TEAM_SPECTATOR ) ) {
                 flags = (cl->ps.eFlags & ~(EF_VOTED | EF_TEAMVOTED)) | (ent->client->ps.eFlags & (EF_VOTED | EF_TEAMVOTED));
                 if ( ! g_freezetag.integer ) {
                     ent->client->ps = cl->ps;
@@ -1186,7 +1189,7 @@ void ClientEndFrame( gentity_t *ent ) {
         return;
     }
 
-    if ( is_spectator (ent->client ) /*ent->client->sess.sessionTeam == TEAM_SPECTATOR*/ ) {
+    if ( ( g_freezetag.integer && is_spectator (ent->client ) )  || ent->client->sess.sessionTeam == TEAM_SPECTATOR ) {
         SpectatorClientEndFrame( ent );
         return;
     }

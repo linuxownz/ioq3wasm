@@ -107,12 +107,12 @@ qboolean CheckGauntletAttack( gentity_t *ent ) {
     }
 
     //freeze
-	if ( g_freezetag.integer && is_body( traceEnt ) ) {
-		tent = G_TempEntity( tr.endpos, EV_MISSILE_HIT );
-		tent->s.otherEntityNum = traceEnt->s.number;
-		tent->s.eventParm = DirToByte( tr.plane.normal );
-		tent->s.weapon = ent->s.weapon;
-	}
+    if ( g_freezetag.integer && is_body( traceEnt ) ) {
+        tent = G_TempEntity( tr.endpos, EV_MISSILE_HIT );
+        tent->s.otherEntityNum = traceEnt->s.number;
+        tent->s.eventParm = DirToByte( tr.plane.normal );
+        tent->s.weapon = ent->s.weapon;
+    }
     //freeze
 
     if ( !traceEnt->takedamage) {
@@ -132,9 +132,9 @@ qboolean CheckGauntletAttack( gentity_t *ent ) {
 #endif
 
     //freeze
-	if ( g_freezetag.integer && g_dmflags.integer & 1024 && !( g_weaponlimit.integer & 2048 ) ) {
-		s_quadFactor = 8;
-	}
+    if ( g_freezetag.integer && g_dmflags.integer & 1024 && !( g_weaponlimit.integer & 2048 ) ) {
+        s_quadFactor = 8;
+    }
     //freeze
 
     damage = 50 * s_quadFactor;
@@ -230,13 +230,11 @@ static void Bullet_Fire (gentity_t *ent, float spread, int damage, int mod ) {
             if( LogAccuracyHit( traceEnt, ent ) ) {
                 ent->client->accuracy_hits++;
             }
-
         //freeze
-		} else if ( g_freezetag.integer && is_body( traceEnt ) ) {
-			tent = G_TempEntity( tr.endpos, EV_BULLET_HIT_FLESH );
-			tent->s.eventParm = traceEnt->s.number;
+        } else if ( g_freezetag.integer && is_body( traceEnt ) ) {
+            tent = G_TempEntity( tr.endpos, EV_BULLET_HIT_FLESH );
+            tent->s.eventParm = traceEnt->s.number;
         //freeze
-
         } else {
             tent = G_TempEntity( tr.endpos, EV_BULLET_HIT_WALL );
             tent->s.eventParm = DirToByte( tr.plane.normal );
@@ -301,7 +299,7 @@ SHOTGUN
 // DEFAULT_SHOTGUN_SPREAD and DEFAULT_SHOTGUN_COUNT are in bg_public.h, because
 // client predicts same spreads
 #define DEFAULT_SHOTGUN_DAMAGE  10
-#define	NEW_SHOTGUN_DAMAGE	9
+#define NEW_SHOTGUN_DAMAGE  9
 
 struct hitShotgunTargets_s {
     gentity_t *targets[MAX_SHOTGUN_COUNT];
@@ -622,9 +620,9 @@ static void weapon_railgun_fire (gentity_t *ent) {
 #endif
         }
         if ( trace.contents & CONTENTS_SOLID ) {
-			if (g_railJump.integer) {
-				G_RailJump( trace.endpos, ent );
-			}
+            if (g_railJump.integer) {
+                G_RailJump( trace.endpos, ent );
+            }
             break;      // we hit something solid enough to stop the beam
         }
         // unlink this entity, so the next trace will go past it
@@ -714,7 +712,7 @@ void Weapon_HookFree (gentity_t *ent)
 
 //freeze
     if ( g_freezetag.integer ) {
-	    ent->parent->timestamp = level.time;
+        ent->parent->timestamp = level.time;
     }
 //freeze
 
@@ -819,11 +817,11 @@ static void Weapon_LightningFire( gentity_t *ent ) {
             tent->s.weapon = ent->s.weapon;
 
 //freeze
-		} else if ( g_freezetag.integer && is_body( traceEnt ) ) {
-			tent = G_TempEntity( tr.endpos, EV_MISSILE_HIT );
-			tent->s.otherEntityNum = traceEnt->s.number;
-			tent->s.eventParm = DirToByte( tr.plane.normal );
-			tent->s.weapon = ent->s.weapon;
+        } else if ( g_freezetag.integer && is_body( traceEnt ) ) {
+            tent = G_TempEntity( tr.endpos, EV_MISSILE_HIT );
+            tent->s.otherEntityNum = traceEnt->s.number;
+            tent->s.eventParm = DirToByte( tr.plane.normal );
+            tent->s.weapon = ent->s.weapon;
 //freeze
 
 
@@ -974,9 +972,9 @@ void FireWeapon( gentity_t *ent ) {
 #endif
 
 //freeze
-	if ( g_freezetag.integer && g_dmflags.integer & 1024 ) {
-		s_quadFactor = 8;
-	}
+    if ( g_freezetag.integer && g_dmflags.integer & 1024 ) {
+        s_quadFactor = 8;
+    }
 //freeze
 
     // track shots taken for accuracy tracking.  Grapple is not a weapon and gauntet is just not tracked

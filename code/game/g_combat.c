@@ -183,9 +183,8 @@ void TossClientItems( gentity_t *self ) {
                 }
             }
         }
-
-
 //freeze
+
         angle = 45;
         for ( i = 1 ; i < PW_NUM_POWERUPS ; i++ ) {
             if ( self->client->ps.powerups[ i ] > level.time ) {
@@ -664,9 +663,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
         if ( client->pers.connected != CON_CONNECTED ) {
             continue;
         }
-        if ( !is_spectator( client ) /*client->sess.sessionTeam != TEAM_SPECTATOR*/ ) {
+//freeze
+        if ( ( g_freezetag.integer && !is_spectator( client ) ) || client->sess.sessionTeam != TEAM_SPECTATOR ) {
             continue;
         }
+//freeze
         if ( client->sess.spectatorClient == self->s.number ) {
             Cmd_Score_f( g_entities + i );
         }
@@ -686,8 +687,9 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
     self->s.loopSound = 0;
 
-    if ( ! g_freezetag.integer )
+    if ( ! g_freezetag.integer ) {
         self->r.maxs[2] = -8;
+    }
 
     // don't allow respawn until the death anim is done
     // g_forcerespawn may force spawning at some later time
@@ -700,7 +702,6 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     // remove powerups
     memset( self->client->ps.powerups, 0, sizeof(self->client->ps.powerups) );
 
-
 //freeze
     if ( g_freezetag.integer ) {
         player_freeze( self, attacker, meansOfDeath );
@@ -712,7 +713,6 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
         self->r.maxs[ 2 ] = -8;
     }
 //freeze
-
 
     // never gib in a nodrop
     contents = SV_PointContents( self->r.currentOrigin, -1 );

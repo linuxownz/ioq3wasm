@@ -72,7 +72,8 @@ void CG_Drop_freeze_f( void ) {
 	}
 
 	Com_sprintf( command, 128, "drop %s", message );
-	SendClientCommand( command );
+    Com_Printf("broken drop command\n");
+	//SendClientCommand( command ); // wont compile not found
 }
 
 void CG_BodyObituary( entityState_t *ent, char *targetName ) {
