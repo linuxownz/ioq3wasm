@@ -17,6 +17,13 @@ code/.ycm_extra_conf.py
 code/Cmd_AddCommand.cmds.txt
 code/sfind
 code/tags
+code/client_tags
+code/cscope_client.out
+code/cscope_server.out
+code/server_tags
+web/proxy/proxy.cfg
+web/webserver/Quake3WebApp/conf/lighttpd.conf
+web/webserver/Quake3WebApp/config.yml
 media/ding.mp3
 media/ding2.wav
 media/dingnochunk.wav
@@ -36,10 +43,7 @@ web/security/selfsignprivate.pem
 web/security/selfsignpublic.pem
 web/webserver/.gitignore
 web/webserver/Notes
-web/webserver/Quake3WebApp/.dancer
-web/webserver/Quake3WebApp/.gitignore
 web/webserver/Quake3WebApp/DBCHANGES
-web/webserver/Quake3WebApp/PASSWORD
 web/webserver/Quake3WebApp/bin/domain.cert.pem
 web/webserver/Quake3WebApp/bin/private.key.pem
 web/webserver/Quake3WebApp/db/TODO_BACKUP_DB
@@ -52,6 +56,4 @@ web/webserver/Quake3WebApp/db/quake3webapp.dbm
 web/webserver/Quake3WebApp/lib/
 web/webserver/Quake3WebApp/logs/Quake3WebApp.log
 web/webserver/Quake3WebApp/logs/development.log
-web/webserver/database.15/
-web/webserver/start_database
 
