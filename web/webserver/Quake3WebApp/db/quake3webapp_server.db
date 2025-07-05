@@ -958,9 +958,17 @@ BEGIN
 
     GET DIAGNOSTICS cnt = row_count;
 
-    IF cnt != 1 THEN
-        RAISE EXCEPTION 'failed to update cvar % with value %', config_name, config_value;
-        RETURN FALSE;
+    IF cnt = 0 THEN
+        RAISE WARNING 'failed to update cvar % with value % count: %', config_name, config_value, cnt;
+
+        INSERT into cvars(name, value, clientserver, owner) VALUES(config_name, config_value, 'client', config_owner);
+
+        GET DIAGNOSTICS cnt = row_count;
+
+        IF cnt != 1 THEN
+            RAISE EXCEPTION 'failed to insert cvar % with value % count: %', config_name, config_value, cnt;
+            RETURN FALSE;
+        END IF;
     END IF;
 
     RETURN true;
@@ -6239,6 +6247,7 @@ cg_drawPing	1	client	408ff53f-f127-446f-8275-88967036ba93
 cg_drawRewards	1	client	408ff53f-f127-446f-8275-88967036ba93
 cg_drawSnapshot	0	client	408ff53f-f127-446f-8275-88967036ba93
 cg_drawStatus	1	client	408ff53f-f127-446f-8275-88967036ba93
+com_maxfps	100	client	83d2455f-af82-4df9-9998-d16bc4b0a857
 cg_drawTimer	1	client	408ff53f-f127-446f-8275-88967036ba93
 cg_enableOSPHUD	1	client	408ff53f-f127-446f-8275-88967036ba93
 cg_enemyColors	2222	client	408ff53f-f127-446f-8275-88967036ba93
@@ -6695,7 +6704,6 @@ r_arb_seamless_cube_map	0	client	83d2455f-af82-4df9-9998-d16bc4b0a857
 r_arb_vertex_array_object	1	client	83d2455f-af82-4df9-9998-d16bc4b0a857
 rate	50000	client	83d2455f-af82-4df9-9998-d16bc4b0a857
 cg_noProjectileTrail	0	client	83d2455f-af82-4df9-9998-d16bc4b0a857
-com_maxfps	144	client	83d2455f-af82-4df9-9998-d16bc4b0a857
 cl_yawspeed	139	client	83d2455f-af82-4df9-9998-d16bc4b0a857
 cl_pitchspeed	203	client	83d2455f-af82-4df9-9998-d16bc4b0a857
 cg_oldRail	1	client	83d2455f-af82-4df9-9998-d16bc4b0a857
@@ -6821,7 +6829,6 @@ s_alDopplerSpeed	2200	client	83d2455f-af82-4df9-9998-d16bc4b0a857
 s_alDriver	libopenal.so.1	client	83d2455f-af82-4df9-9998-d16bc4b0a857
 s_alGain	1.0	client	83d2455f-af82-4df9-9998-d16bc4b0a857
 r_postProcess	1	client	83d2455f-af82-4df9-9998-d16bc4b0a857
-r_gamma	1.25	client	83d2455f-af82-4df9-9998-d16bc4b0a857
 r_customwidth	1600	client	83d2455f-af82-4df9-9998-d16bc4b0a857
 r_customheight	1200	client	83d2455f-af82-4df9-9998-d16bc4b0a857
 s_alInputDevice		client	83d2455f-af82-4df9-9998-d16bc4b0a857
@@ -6883,6 +6890,7 @@ sv_maxclients	64	server	83d2455f-af82-4df9-9998-d16bc4b0a857
 s_musicvolume	0.5	client	83d2455f-af82-4df9-9998-d16bc4b0a857
 team_model	sarge	client	83d2455f-af82-4df9-9998-d16bc4b0a857
 team_headmodel	tankjr	client	83d2455f-af82-4df9-9998-d16bc4b0a857
+r_gamma	1	client	83d2455f-af82-4df9-9998-d16bc4b0a857
 sensitivity	2.8	client	83d2455f-af82-4df9-9998-d16bc4b0a857
 cg_drawTeamOverlay	0	client	408ff53f-f127-446f-8275-88967036ba93
 sensitivity	.8	client	408ff53f-f127-446f-8275-88967036ba93
@@ -7851,6 +7859,10 @@ COPY webapp.logins (userid, datetime, ipaddress, loginid) FROM stdin;
 408ff53f-f127-446f-8275-88967036ba93	2025-06-03 18:23:45.829273	127.0.0.1	545353c8-7255-4980-9792-51f027494f79
 408ff53f-f127-446f-8275-88967036ba93	2025-06-06 17:38:19.694259	127.0.0.1	65d7f302-35ea-41b6-a52b-ac14a6207f03
 83d2455f-af82-4df9-9998-d16bc4b0a857	2025-06-06 17:39:17.31515	127.0.0.1	79df389d-3016-4445-9316-216aae926a0a
+408ff53f-f127-446f-8275-88967036ba93	2025-06-17 16:41:15.98458	127.0.0.1	691ccccc-283c-47a1-8ea4-d296ab6fe820
+83d2455f-af82-4df9-9998-d16bc4b0a857	2025-06-17 16:41:23.513637	127.0.0.1	0aac30f9-e521-41ab-be4b-40553062604a
+408ff53f-f127-446f-8275-88967036ba93	2025-07-05 14:59:47.632902	127.0.0.1	d76c3c5d-b475-4cae-8d9a-65bb510951cc
+83d2455f-af82-4df9-9998-d16bc4b0a857	2025-07-05 15:53:24.751874	127.0.0.1	5b49534b-2225-43eb-984c-3b508b9dbf4b
 \.
 
 
@@ -7984,6 +7996,9 @@ COPY webapp.logouts (userid, datetime, loginid) FROM stdin;
 408ff53f-f127-446f-8275-88967036ba93	2025-04-30 19:44:56.57497	53bda2b0-d08d-4281-9596-b636d721f669
 408ff53f-f127-446f-8275-88967036ba93	2025-05-26 11:45:35.68342	0d4667e8-bdf1-415a-b97c-58077b09080d
 408ff53f-f127-446f-8275-88967036ba93	2025-06-06 17:39:12.799234	65d7f302-35ea-41b6-a52b-ac14a6207f03
+408ff53f-f127-446f-8275-88967036ba93	2025-06-17 16:41:17.540517	691ccccc-283c-47a1-8ea4-d296ab6fe820
+83d2455f-af82-4df9-9998-d16bc4b0a857	2025-07-05 14:44:11.003742	0aac30f9-e521-41ab-be4b-40553062604a
+408ff53f-f127-446f-8275-88967036ba93	2025-07-05 15:53:18.013017	d76c3c5d-b475-4cae-8d9a-65bb510951cc
 \.
 
 
@@ -77716,8 +77731,34 @@ COPY webapp.q3serverlog (instance_id, log_line) FROM stdin;
 
 COPY webapp.request (id, command, request_state, "timestamp", arguments, target_server) FROM stdin;
 7892	quit	new	2025-06-15 18:55:38.244397		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7893	quit	new	2025-06-16 16:23:28.743905		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7894	quit	new	2025-06-17 17:43:20.345489		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7895	quit	new	2025-06-18 14:00:38.549663		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7896	quit	new	2025-06-18 20:59:42.604308		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7897	quit	new	2025-06-19 12:15:05.581227		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7898	quit	new	2025-06-20 21:39:59.688721		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7899	quit	new	2025-06-22 18:04:46.608254		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7900	quit	new	2025-06-23 11:53:22.928159		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7901	quit	new	2025-06-23 19:51:28.959107		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7902	quit	new	2025-06-24 23:11:03.629314		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7903	quit	new	2025-06-25 09:29:22.209764		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7904	quit	new	2025-06-25 21:30:23.64605		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7905	quit	new	2025-06-26 23:05:08.673068		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7906	quit	new	2025-06-27 23:43:26.467595		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7907	quit	new	2025-06-28 23:26:10.467225		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7908	quit	new	2025-06-29 22:56:33.722096		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7909	quit	new	2025-06-30 22:59:03.167595		d8705b00-d001-4a81-920f-b879ee1e3cdf
 7857	getcvar	complete	2025-05-03 12:42:36.398683	g_freezetag	c39f02f8-9d35-45a3-8664-bcf6edb754b6
+7910	quit	new	2025-07-01 23:13:30.338289		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7911	quit	new	2025-07-02 16:02:36.655623		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7912	quit	new	2025-07-02 23:00:18.509158		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7913	quit	new	2025-07-03 22:00:28.706008		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7914	quit	new	2025-07-04 14:52:04.041874		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7915	quit	new	2025-07-04 17:27:17.274751		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7916	quit	new	2025-07-04 19:23:46.563837		d8705b00-d001-4a81-920f-b879ee1e3cdf
 7858	set	complete	2025-05-03 12:42:53.932571	g_freezetag 1	c39f02f8-9d35-45a3-8664-bcf6edb754b6
+7917	quit	new	2025-07-05 15:14:03.764155		d8705b00-d001-4a81-920f-b879ee1e3cdf
+7918	quit	new	2025-07-05 16:38:15.074041		d8705b00-d001-4a81-920f-b879ee1e3cdf
 7859	map_restart	complete	2025-05-03 12:43:06.525872	g_freezetag 1	c39f02f8-9d35-45a3-8664-bcf6edb754b6
 7860	getcvar	complete	2025-05-03 12:43:16.535011	g_freezetag	c39f02f8-9d35-45a3-8664-bcf6edb754b6
 7861	quit	new	2025-05-03 21:16:30.481693		d8705b00-d001-4a81-920f-b879ee1e3cdf
@@ -88359,6 +88400,7 @@ aBuh6FZ7Oeazy9pLaCt9oFVHuvosPACn	{"fullname":"Mr. Holyshit","loginid":"f8692d8b-
 aDSMpS4Q8ldsbVQ0vCn0hYVKpGZLrroB	{"userid":"83d2455f-af82-4df9-9998-d16bc4b0a857","admin":0,"loggedin":"1","loginid":"db7c784e-e005-40f5-bf15-6fd9d0682518","fullname":"Player One1"}
 aD918WBfNNQw2YKerma7EBx0rdXPLlHv	{"loginid":"545353c8-7255-4980-9792-51f027494f79","userid":"408ff53f-f127-446f-8275-88967036ba93","loggedin":"1","fullname":"Mr. Holyshit","admin":1}
 aENgBWixAPIX6eNfvOkozy7GuiGhda5f	{"userid":"83d2455f-af82-4df9-9998-d16bc4b0a857","admin":0,"fullname":"Player One1","loginid":"79df389d-3016-4445-9316-216aae926a0a","loggedin":"1"}
+aGmCtF8zUXnWAXZCyyNjHGQ_etQIgct8	{"admin":0,"userid":"83d2455f-af82-4df9-9998-d16bc4b0a857","loggedin":"1","fullname":"Player One1","loginid":"5b49534b-2225-43eb-984c-3b508b9dbf4b"}
 \.
 
 
@@ -88396,6 +88438,16 @@ COPY webapp.visits (date, ipaddress) FROM stdin;
 2025-06-03 18:07:20.521161	127.0.0.1
 2025-06-03 18:23:41.035909	127.0.0.1
 2025-06-06 17:38:16.485899	127.0.0.1
+2025-06-17 16:40:41.451522	127.0.0.1
+2025-06-17 16:41:12.292412	127.0.0.1
+2025-06-18 11:20:59.951378	127.0.0.1
+2025-06-19 12:00:54.204616	127.0.0.1
+2025-06-19 12:01:14.116843	127.0.0.1
+2025-06-20 13:23:42.838705	127.0.0.1
+2025-06-20 13:23:43.13478	127.0.0.1
+2025-06-21 23:25:12.872417	127.0.0.1
+2025-06-23 17:58:56.569	127.0.0.1
+2025-06-23 17:59:09.051877	127.0.0.1
 \.
 
 
@@ -88403,7 +88455,7 @@ COPY webapp.visits (date, ipaddress) FROM stdin;
 -- Name: action_request_seq; Type: SEQUENCE SET; Schema: webapp; Owner: campbell
 --
 
-SELECT pg_catalog.setval('webapp.action_request_seq', 7892, true);
+SELECT pg_catalog.setval('webapp.action_request_seq', 7918, true);
 
 
 --
