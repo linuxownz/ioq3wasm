@@ -174,6 +174,8 @@ vmCvar_t    cg_oldRocket;
 vmCvar_t    cg_oldPlasma;
 vmCvar_t    cg_trueLightning;
 
+vmCvar_t    cg_outlineEnemyPlayer;
+
 #ifdef MISSIONPACK
 vmCvar_t    cg_redTeamName;
 vmCvar_t    cg_blueTeamName;
@@ -314,7 +316,7 @@ static cvarTable_t cvarTable[] = {
     { &cg_smoothClients, "cg_smoothClients", "0", CVAR_USERINFO | CVAR_ARCHIVE},
     { &cg_cameraMode, "com_cameraMode", "0", CVAR_CHEAT},
 
-    { &pmove_fixed, "pmove_fixed", "0", CVAR_SYSTEMINFO},
+    { &pmove_fixed, "pmove_fixed", "1", CVAR_SYSTEMINFO},
     { &pmove_msec, "pmove_msec", "8", CVAR_SYSTEMINFO},
 
 #ifdef MISSIONPACK
@@ -327,7 +329,8 @@ static cvarTable_t cvarTable[] = {
     { &cg_oldRail, "cg_oldRail", "1", CVAR_ARCHIVE},
     { &cg_oldRocket, "cg_oldRocket", "1", CVAR_ARCHIVE},
     { &cg_oldPlasma, "cg_oldPlasma", "1", CVAR_ARCHIVE},
-    { &cg_trueLightning, "cg_trueLightning", "0.0", CVAR_ARCHIVE}
+    { &cg_trueLightning, "cg_trueLightning", "0.0", CVAR_ARCHIVE},
+    { &cg_outlineEnemyPlayer, "cg_outlineEnemyPlayer", "0", CVAR_ARCHIVE}
 
 //  { &cg_pmove_fixed, "cg_pmove_fixed", "0", CVAR_USERINFO | CVAR_ARCHIVE }
 };
@@ -982,6 +985,8 @@ static void CG_RegisterGraphics2(void) {
     cgs.media.invisShader        = RE_RegisterShader("powerups/invisibility" );
     cgs.media.regenShader        = RE_RegisterShader("powerups/regen" );
     cgs.media.hastePuffShader    = RE_RegisterShader("hasteSmokePuff" );
+
+    cgs.media.playerOutlineShader = RE_RegisterShader("playerOutline" );
 
 #ifdef MISSIONPACK
     if ( cgs.gametype == GT_HARVESTER || cg_buildScript.integer ) {

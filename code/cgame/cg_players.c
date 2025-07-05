@@ -2146,6 +2146,7 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, entityState_t *state, int te
             ent->customShader = cgs.media.battleSuitShader;
             RE_AddRefEntityToScene( ent );
         }
+
     }
 }
 
@@ -2198,6 +2199,54 @@ static int CG_LightVerts( vec3_t normal, int numVerts, polyVert_t *verts )
     return qtrue;
 }
 #endif
+
+qboolean CG_IsEnemyTeam( int clientNum ) {
+    int     localPlayerTeam;
+    int     otherPlayerTeam;
+
+    // 1. Get the local player's team from their persistent player state.
+    localPlayerTeam = cg.snap->ps.persistant[PERS_TEAM];
+
+    // 2. Get the other player's team from their clientinfo entry.
+    // Perform a sanity check for valid clientNum.
+    if ( clientNum < 0 || clientNum >= MAX_CLIENTS ) {
+        return qfalse; // Invalid client number
+    }
+    otherPlayerTeam = cgs.clientinfo[clientNum].team;
+
+    // 3. Compare Teams:
+
+    // Spectators are never enemies in a team sense.
+    if ( localPlayerTeam == TEAM_SPECTATOR || otherPlayerTeam == TEAM_SPECTATOR ) {
+        return qfalse;
+    }
+
+    // In team games, FFA players are usually neutral to team players.
+    // If you want FFA players to be considered enemies, you would modify this logic.
+    if ( localPlayerTeam == TEAM_FREE || otherPlayerTeam == TEAM_FREE ) {
+        return qfalse;
+    }
+
+    // If both players are on a team and their teams are different, they are enemies.
+    if ( localPlayerTeam != otherPlayerTeam ) {
+        return qtrue;
+    }
+
+    // Otherwise, they are on the same team or are neutral.
+    return qfalse;
+}
+
+void CG_AddPlayerOutline ( refEntity_t *ent, int clientNum ) {
+    extern vmCvar_t cg_outlineEnemyPlayer;
+    if ( cg_outlineEnemyPlayer.integer && CG_IsEnemyTeam(clientNum) ) {
+        ent->customShader = cgs.media.playerOutlineShader;
+        ent->shaderRGBA[0] = 0x00;
+        ent->shaderRGBA[1] = 0xff;
+        ent->shaderRGBA[2] = 0x00;
+        ent->shaderRGBA[3] = 0xff;
+        RE_AddRefEntityToScene( ent );
+    }
+}
 
 /*
 ===============
@@ -2295,6 +2344,8 @@ void CG_Player( centity_t *cent ) {
 
     CG_AddRefEntityWithPowerups( &legs, &cent->currentState, ci->team );
 
+    CG_AddPlayerOutline(&legs, clientNum);
+
     // if the model failed, allow the default nullmodel to be displayed
     if (!legs.hModel) {
         return;
@@ -2319,6 +2370,7 @@ void CG_Player( centity_t *cent ) {
 
     CG_AddRefEntityWithPowerups( &torso, &cent->currentState, ci->team );
 
+    CG_AddPlayerOutline(&torso, clientNum);
 #ifdef MISSIONPACK
     if ( cent->currentState.eFlags & EF_KAMIKAZE ) {
 
@@ -2545,6 +2597,7 @@ void CG_Player( centity_t *cent ) {
     head.renderfx = renderfx;
 
     CG_AddRefEntityWithPowerups( &head, &cent->currentState, ci->team );
+    CG_AddPlayerOutline(&head, clientNum);
 
 #ifdef MISSIONPACK
     CG_BreathPuffs(cent, &head);
