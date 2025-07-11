@@ -25,6 +25,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 qboolean FS_GetPreLoadedFile(const char *filename, void **data, int *length) ;
 
+extern vmCvar_t cg_outlineEnemyPlayer;
+extern vmCvar_t cg_outlineEnemyPlayerColor;
+
+
 #include "../qcommon/qcommon_client.h"
 #include "../renderercommon/tr_public.h"
 #include "../client/snd_public.h"
@@ -2237,12 +2241,30 @@ qboolean CG_IsEnemyTeam( int clientNum ) {
 }
 
 void CG_AddPlayerOutline ( refEntity_t *ent, int clientNum ) {
-    extern vmCvar_t cg_outlineEnemyPlayer;
+
+    static long int color = 0x00ff00;
+    static int modCount = 0;
+
     if ( cg_outlineEnemyPlayer.integer && CG_IsEnemyTeam(clientNum) ) {
+        if ( cg_outlineEnemyPlayerColor.modificationCount != modCount) {
+
+            char *endptr = NULL;
+            color = strtol(cg_outlineEnemyPlayerColor.string, &endptr, 16);
+
+            if ( *endptr != '\0' ) {
+                Com_Printf("failed to parse cg_outlineEnemyPlayerColor, defaulting to green\n");
+                color = 0x00ff00;
+            } else {
+                Com_Printf("parsed cg_outlineEnemyPlayerColor to %ld 0x%x\n", color, (int)color);
+            }
+
+            modCount = cg_outlineEnemyPlayerColor.modificationCount;
+        }
+
         ent->customShader = cgs.media.playerOutlineShader;
-        ent->shaderRGBA[0] = 0x00;
-        ent->shaderRGBA[1] = 0xff;
-        ent->shaderRGBA[2] = 0x00;
+        ent->shaderRGBA[0] = (byte)( ( color & 0xff0000 ) >> 16 );
+        ent->shaderRGBA[1] = (byte)( ( color & 0x00ff00 ) >>  8 );
+        ent->shaderRGBA[2] = (byte)( ( color & 0x0000ff ) >>  0 );
         ent->shaderRGBA[3] = 0xff;
         RE_AddRefEntityToScene( ent );
     }
@@ -2344,7 +2366,9 @@ void CG_Player( centity_t *cent ) {
 
     CG_AddRefEntityWithPowerups( &legs, &cent->currentState, ci->team );
 
-    CG_AddPlayerOutline(&legs, clientNum);
+    if ( ! ( cent->currentState.powerups & ( 1 << PW_INVIS ) ) ) {
+        CG_AddPlayerOutline(&legs, clientNum);
+    }
 
     // if the model failed, allow the default nullmodel to be displayed
     if (!legs.hModel) {
@@ -2370,7 +2394,10 @@ void CG_Player( centity_t *cent ) {
 
     CG_AddRefEntityWithPowerups( &torso, &cent->currentState, ci->team );
 
-    CG_AddPlayerOutline(&torso, clientNum);
+    if ( ! ( cent->currentState.powerups & ( 1 << PW_INVIS ) ) ) {
+        CG_AddPlayerOutline(&torso, clientNum);
+    }
+
 #ifdef MISSIONPACK
     if ( cent->currentState.eFlags & EF_KAMIKAZE ) {
 
@@ -2597,7 +2624,10 @@ void CG_Player( centity_t *cent ) {
     head.renderfx = renderfx;
 
     CG_AddRefEntityWithPowerups( &head, &cent->currentState, ci->team );
-    CG_AddPlayerOutline(&head, clientNum);
+
+    if ( ! ( cent->currentState.powerups & ( 1 << PW_INVIS ) ) ) {
+        CG_AddPlayerOutline(&head, clientNum);
+    }
 
 #ifdef MISSIONPACK
     CG_BreathPuffs(cent, &head);

@@ -175,6 +175,7 @@ vmCvar_t    cg_oldPlasma;
 vmCvar_t    cg_trueLightning;
 
 vmCvar_t    cg_outlineEnemyPlayer;
+vmCvar_t    cg_outlineEnemyPlayerColor;
 
 #ifdef MISSIONPACK
 vmCvar_t    cg_redTeamName;
@@ -330,7 +331,8 @@ static cvarTable_t cvarTable[] = {
     { &cg_oldRocket, "cg_oldRocket", "1", CVAR_ARCHIVE},
     { &cg_oldPlasma, "cg_oldPlasma", "1", CVAR_ARCHIVE},
     { &cg_trueLightning, "cg_trueLightning", "0.0", CVAR_ARCHIVE},
-    { &cg_outlineEnemyPlayer, "cg_outlineEnemyPlayer", "0", CVAR_ARCHIVE}
+    { &cg_outlineEnemyPlayer, "cg_outlineEnemyPlayer", "0", CVAR_ARCHIVE},
+    { &cg_outlineEnemyPlayerColor, "cg_outlineEnemyPlayerColor", "00FF00", CVAR_ARCHIVE}
 
 //  { &cg_pmove_fixed, "cg_pmove_fixed", "0", CVAR_USERINFO | CVAR_ARCHIVE }
 };
