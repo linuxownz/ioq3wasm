@@ -219,7 +219,10 @@ static void CG_Obituary( entityState_t *ent ) {
     if ( attacker == cg.snap->ps.clientNum ) {
         char    *s;
 
-        S_StartLocalSound( cgs.media.fragSound, CHAN_LOCAL_SOUND );
+        extern vmCvar_t cg_playFragSound;
+        if ( cg_playFragSound.integer ) {
+            S_StartLocalSound( cgs.media.fragSound, CHAN_LOCAL_SOUND );
+        }
 
         if ( cgs.gametype < GT_TEAM ) {
             s = va("You fragged %s\n%s place with %i", targetName,
