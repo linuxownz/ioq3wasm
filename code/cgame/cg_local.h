@@ -801,6 +801,7 @@ typedef struct {
     qhandle_t   hastePuffShader;
 
     qhandle_t   playerOutlineShader;
+    qhandle_t   playerFullShader; // not outline
 
 #ifdef MISSIONPACK
     qhandle_t   redKamikazeShader;
