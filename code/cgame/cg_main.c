@@ -989,6 +989,7 @@ static void CG_RegisterGraphics2(void) {
     cgs.media.hastePuffShader    = RE_RegisterShader("hasteSmokePuff" );
 
     cgs.media.playerOutlineShader = RE_RegisterShader("playerOutline" );
+    cgs.media.playerFullShader    = RE_RegisterShader("playerFull" );
 
 #ifdef MISSIONPACK
     if ( cgs.gametype == GT_HARVESTER || cg_buildScript.integer ) {

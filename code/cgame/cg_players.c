@@ -2240,10 +2240,12 @@ qboolean CG_IsEnemyTeam( int clientNum ) {
     return qfalse;
 }
 
-void CG_AddPlayerOutline ( refEntity_t *ent, int clientNum ) {
+void CG_AddPlayerOutline ( refEntity_t *ent, centity_t *cent ) {
 
     static long int color = 0x00ff00;
     static int modCount = 0;
+
+    int clientNum = cent->currentState.clientNum;
 
     if ( cg_outlineEnemyPlayer.integer && CG_IsEnemyTeam(clientNum) ) {
         if ( cg_outlineEnemyPlayerColor.modificationCount != modCount) {
@@ -2262,10 +2264,18 @@ void CG_AddPlayerOutline ( refEntity_t *ent, int clientNum ) {
         }
 
         ent->customShader = cgs.media.playerOutlineShader;
+
         ent->shaderRGBA[0] = (byte)( ( color & 0xff0000 ) >> 16 );
         ent->shaderRGBA[1] = (byte)( ( color & 0x00ff00 ) >>  8 );
         ent->shaderRGBA[2] = (byte)( ( color & 0x0000ff ) >>  0 );
         ent->shaderRGBA[3] = 0xff;
+
+        if ( ! ( cent->currentState.eFlags & EF_DEAD ) ) {
+            ent->shaderRGBA[0] = ent->shaderRGBA[1] = ent->shaderRGBA[2] = 0x20;
+            ent->shaderRGBA[3] = 0xC0;
+            ent->customShader = cgs.media.playerFullShader;
+        }
+
         RE_AddRefEntityToScene( ent );
     }
 }
@@ -2367,7 +2377,7 @@ void CG_Player( centity_t *cent ) {
     CG_AddRefEntityWithPowerups( &legs, &cent->currentState, ci->team );
 
     if ( ! ( cent->currentState.powerups & ( 1 << PW_INVIS ) ) ) {
-        CG_AddPlayerOutline(&legs, clientNum);
+        CG_AddPlayerOutline(&legs, cent);
     }
 
     // if the model failed, allow the default nullmodel to be displayed
@@ -2395,7 +2405,7 @@ void CG_Player( centity_t *cent ) {
     CG_AddRefEntityWithPowerups( &torso, &cent->currentState, ci->team );
 
     if ( ! ( cent->currentState.powerups & ( 1 << PW_INVIS ) ) ) {
-        CG_AddPlayerOutline(&torso, clientNum);
+        CG_AddPlayerOutline(&torso, cent);
     }
 
 #ifdef MISSIONPACK
@@ -2626,7 +2636,7 @@ void CG_Player( centity_t *cent ) {
     CG_AddRefEntityWithPowerups( &head, &cent->currentState, ci->team );
 
     if ( ! ( cent->currentState.powerups & ( 1 << PW_INVIS ) ) ) {
-        CG_AddPlayerOutline(&head, clientNum);
+        CG_AddPlayerOutline(&head, cent);
     }
 
 #ifdef MISSIONPACK
