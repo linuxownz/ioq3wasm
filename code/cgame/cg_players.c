@@ -25,8 +25,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 qboolean FS_GetPreLoadedFile(const char *filename, void **data, int *length) ;
 
-extern vmCvar_t cg_outlineEnemyPlayer;
-extern vmCvar_t cg_outlineEnemyPlayerColor;
+extern vmCvar_t cg_hilightEnemyPlayer;
+extern vmCvar_t cg_hilightEnemyPlayerColor;
 
 
 #include "../qcommon/qcommon_client.h"
@@ -2240,37 +2240,46 @@ qboolean CG_IsEnemyTeam( int clientNum ) {
     return qfalse;
 }
 
-void CG_AddPlayerOutline ( refEntity_t *ent, centity_t *cent ) {
+void CG_AddPlayerHilight ( refEntity_t *ent, centity_t *cent ) {
+
+    // don't hilight if player has invisibility
+    if ( cent->currentState.powerups & ( 1 << PW_INVIS ) ) {
+        return;
+    }
 
     static long int color = 0x00ff00;
     static int modCount = 0;
 
     int clientNum = cent->currentState.clientNum;
 
-    if ( cg_outlineEnemyPlayer.integer && CG_IsEnemyTeam(clientNum) ) {
-        if ( cg_outlineEnemyPlayerColor.modificationCount != modCount) {
+    if ( cg_hilightEnemyPlayer.integer && CG_IsEnemyTeam(clientNum) ) {
+        if ( cg_hilightEnemyPlayerColor.modificationCount != modCount) {
 
             char *endptr = NULL;
-            color = strtol(cg_outlineEnemyPlayerColor.string, &endptr, 16);
+            color = strtol(cg_hilightEnemyPlayerColor.string, &endptr, 16);
 
             if ( *endptr != '\0' ) {
-                Com_Printf("failed to parse cg_outlineEnemyPlayerColor, defaulting to green\n");
+                Com_Printf("failed to parse cg_hilightEnemyPlayerColor, defaulting to green\n");
                 color = 0x00ff00;
             } else {
-                Com_Printf("parsed cg_outlineEnemyPlayerColor to %ld 0x%x\n", color, (int)color);
+                Com_Printf("parsed cg_hilightEnemyPlayerColor to %ld 0x%x\n", color, (int)color);
             }
 
-            modCount = cg_outlineEnemyPlayerColor.modificationCount;
+            modCount = cg_hilightEnemyPlayerColor.modificationCount;
         }
 
         ent->customShader = cgs.media.playerOutlineShader;
+
+        if ( cg_hilightEnemyPlayer.integer == 2 ) {
+            ent->customShader = cgs.media.playerFullShader;
+        }
 
         ent->shaderRGBA[0] = (byte)( ( color & 0xff0000 ) >> 16 );
         ent->shaderRGBA[1] = (byte)( ( color & 0x00ff00 ) >>  8 );
         ent->shaderRGBA[2] = (byte)( ( color & 0x0000ff ) >>  0 );
         ent->shaderRGBA[3] = 0xff;
 
-        if ( ! ( cent->currentState.eFlags & EF_DEAD ) ) {
+        if ( cent->currentState.eFlags & EF_DEAD ) {
             ent->shaderRGBA[0] = ent->shaderRGBA[1] = ent->shaderRGBA[2] = 0x20;
             ent->shaderRGBA[3] = 0xC0;
             ent->customShader = cgs.media.playerFullShader;
@@ -2376,9 +2385,7 @@ void CG_Player( centity_t *cent ) {
 
     CG_AddRefEntityWithPowerups( &legs, &cent->currentState, ci->team );
 
-    if ( ! ( cent->currentState.powerups & ( 1 << PW_INVIS ) ) ) {
-        CG_AddPlayerOutline(&legs, cent);
-    }
+    CG_AddPlayerHilight(&legs, cent);
 
     // if the model failed, allow the default nullmodel to be displayed
     if (!legs.hModel) {
@@ -2404,9 +2411,7 @@ void CG_Player( centity_t *cent ) {
 
     CG_AddRefEntityWithPowerups( &torso, &cent->currentState, ci->team );
 
-    if ( ! ( cent->currentState.powerups & ( 1 << PW_INVIS ) ) ) {
-        CG_AddPlayerOutline(&torso, cent);
-    }
+    CG_AddPlayerHilight(&torso, cent);
 
 #ifdef MISSIONPACK
     if ( cent->currentState.eFlags & EF_KAMIKAZE ) {
@@ -2635,9 +2640,7 @@ void CG_Player( centity_t *cent ) {
 
     CG_AddRefEntityWithPowerups( &head, &cent->currentState, ci->team );
 
-    if ( ! ( cent->currentState.powerups & ( 1 << PW_INVIS ) ) ) {
-        CG_AddPlayerOutline(&head, cent);
-    }
+    CG_AddPlayerHilight(&head, cent);
 
 #ifdef MISSIONPACK
     CG_BreathPuffs(cent, &head);
