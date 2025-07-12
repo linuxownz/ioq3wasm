@@ -2270,7 +2270,7 @@ void CG_AddPlayerOutline ( refEntity_t *ent, centity_t *cent ) {
         ent->shaderRGBA[2] = (byte)( ( color & 0x0000ff ) >>  0 );
         ent->shaderRGBA[3] = 0xff;
 
-        if ( ! ( cent->currentState.eFlags & EF_DEAD ) ) {
+        if ( cent->currentState.eFlags & EF_DEAD ) {
             ent->shaderRGBA[0] = ent->shaderRGBA[1] = ent->shaderRGBA[2] = 0x20;
             ent->shaderRGBA[3] = 0xC0;
             ent->customShader = cgs.media.playerFullShader;
