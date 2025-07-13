@@ -2219,7 +2219,6 @@ qboolean CG_IsEnemyTeam( int clientNum ) {
     otherPlayerTeam = cgs.clientinfo[clientNum].team;
 
     // 3. Compare Teams:
-
     // Spectators are never enemies in a team sense.
     if ( localPlayerTeam == TEAM_SPECTATOR || otherPlayerTeam == TEAM_SPECTATOR ) {
         return qfalse;
@@ -2228,7 +2227,7 @@ qboolean CG_IsEnemyTeam( int clientNum ) {
     // In team games, FFA players are usually neutral to team players.
     // If you want FFA players to be considered enemies, you would modify this logic.
     if ( localPlayerTeam == TEAM_FREE || otherPlayerTeam == TEAM_FREE ) {
-        return qfalse;
+        return qtrue;
     }
 
     // If both players are on a team and their teams are different, they are enemies.
@@ -2271,7 +2270,13 @@ void CG_AddPlayerHilight ( refEntity_t *ent, centity_t *cent ) {
         ent->customShader = cgs.media.playerOutlineShader;
 
         if ( cg_hilightEnemyPlayer.integer == 2 ) {
-            ent->customShader = cgs.media.playerFullShader;
+            int powerups = cent->currentState.powerups;
+            qboolean other = ( powerups & ( 1 << PW_QUAD ) ) | ( powerups & ( 1 << PW_REGEN ) ) | ( powerups & ( 1 << PW_BATTLESUIT ) );
+
+            // dont show full hilight if player has any of the above powerups
+            if ( ! other ) {
+                ent->customShader = cgs.media.playerFullShader;
+            }
         }
 
         ent->shaderRGBA[0] = (byte)( ( color & 0xff0000 ) >> 16 );
