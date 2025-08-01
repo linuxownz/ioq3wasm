@@ -939,7 +939,7 @@ be on an entity that hasn't spawned yet.
 */
 void G_SpawnItemInstagib(gentity_t* ent, gitem_t* item) {
 
-	if (item->giType != IT_TEAM)
+	//if (item->giType != IT_TEAM) // this is a bug ...
 	{
 
 		G_SpawnFloat("random", "0", &ent->random);
@@ -965,7 +965,7 @@ void G_SpawnItemInstagib(gentity_t* ent, gitem_t* item) {
 		ent->think = FinishSpawningItem;
 
 		ent->physicsBounce = 0.50;         // items are bouncy
-		ent->s.eFlags |= EF_NODRAW;
+		//ent->s.eFlags |= EF_NODRAW;
 
 		if (item->giType == IT_POWERUP) {
 			G_SoundIndex("sound/items/poweruprespawn.wav");
