@@ -1434,7 +1434,7 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 
         } else {
             void DumpStage ( shaderStage_t *stage );
-            DumpStage(pStage);
+            //DumpStage(pStage);
             Com_Printf("STAGE %d\n", stage);
             assert(pStage->bundle[0].image[0]);
         }

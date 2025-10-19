@@ -125,7 +125,7 @@ while ( $run ) {
         get_server_status();
 
         my $dur = sprintf("%.02f",  tv_interval ( $t1 ) );
-        if ( $dur > 0.1 ) {
+        if ( $dur > 0.7 ) {
             do_log "Time to check destroy/server status $dur";
         }
     }

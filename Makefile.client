@@ -339,6 +339,7 @@ RENDERCOMMONHEADERS = \
  	$(CODE_DIR)/renderercommon/tr_public.h \
  	$(CODE_DIR)/renderercommon/tr_types.h
 
+# $(CODE_DIR)/renderergl2/tr_shader_helper.c 
 RENDERGL2SRCFILES = \
  	$(CODE_DIR)/renderergl2/tr_animation.c \
  	$(CODE_DIR)/renderergl2/tr_backend.c \
@@ -366,7 +367,6 @@ RENDERGL2SRCFILES = \
  	$(CODE_DIR)/renderergl2/tr_shade.c \
  	$(CODE_DIR)/renderergl2/tr_shade_calc.c \
  	$(CODE_DIR)/renderergl2/tr_shader.c \
- 	$(CODE_DIR)/renderergl2/tr_shader_helper.c \
  	$(CODE_DIR)/renderergl2/tr_shadows.c \
  	$(CODE_DIR)/renderergl2/tr_sky.c \
  	$(CODE_DIR)/renderergl2/tr_surface.c \
