@@ -311,8 +311,8 @@ static void GLSL_GetShaderHeader( GLenum shaderType, const GLchar *extra, char *
 
 		if (glesMajorVersion >= 2)
 		{
-			Q_strcat(dest, size, "precision mediump float;\n");
-			Q_strcat(dest, size, "precision mediump sampler2DShadow;\n");
+			Q_strcat(dest, size, "precision highp float;\n");
+			Q_strcat(dest, size, "precision highp sampler2DShadow;\n");
 		}
 
         if(shaderType == GL_VERTEX_SHADER)

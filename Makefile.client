@@ -325,11 +325,12 @@ QCOMMONHEADERS = \
  	$(CODE_DIR)/qcommon/q_shared_client.h \
  	$(CODE_DIR)/qcommon/surfaceflags.h
 
+# $(CODE_DIR)/renderercommon/tr_image_bmp.c \
+$(CODE_DIR)/renderercommon/tr_image_jpg.c \
+$(CODE_DIR)/renderercommon/tr_image_tga.c 
+
 RENDERCOMMONSRCFILES = \
- 	$(CODE_DIR)/renderercommon/tr_image_bmp.c \
- 	$(CODE_DIR)/renderercommon/tr_image_jpg.c \
  	$(CODE_DIR)/renderercommon/tr_image_png.c \
- 	$(CODE_DIR)/renderercommon/tr_image_tga.c \
  	$(CODE_DIR)/renderercommon/tr_noise.c
 
 RENDERCOMMONHEADERS = \
