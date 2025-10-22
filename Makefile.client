@@ -76,6 +76,9 @@ COMPILE_FLAGS += -sUSE_LIBPNG
 
 ifeq ($(DEBUG), 1)
   COMPILE_FLAGS += -DDEBUG
+else
+  COMPILE_FLAGS += -ffast-math
+  COMPILE_FLAGS += -msimd128
 endif
 
 # emcc --show-ports
